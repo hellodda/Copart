@@ -6,14 +6,25 @@
 <MudSnackbarProvider />
 
 <div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
     <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
+            <nav class="navbar navbar-dark main-navbar">
+                <div class="container-fluid align-items-center">
+                    <a class="navbar-brand me-3" href="#">
+                        <img src="Resources/logo.svg" alt="Logo" height="40">
+                    </a>
+
+                    <form class="d-flex flex-grow-1 mx-3" style="max-width: 700px;">
+                        <input class="form-control me-2" type="search" placeholder="Search..." aria-label="Search" style="min-width: 0;">
+                        <button class="btn btn-warning px-3" type="submit">Search</button>
+                    </form>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-warning">Register</button>
+                        <button class="btn menu-button">Sign in</button>
+                    </div>
+                </div>
+            </nav>
+
 
         <article class="content px-4">
             @Body

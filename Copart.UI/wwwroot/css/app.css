@@ -103,12 +103,39 @@ code {
 }
 
 .main-navbar {
-    background: linear-gradient(to right, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.9) 15%, #002766 50%, #0047b3 70%, #0055ff 100% );
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.9) 15%, #043AC1 50%, #043AC1 70%, #043AC1 100%);
     padding: 0.5rem 1rem;
     height: 5.5rem;
 }
 
 .menu-button {
-    background-color: blue; 
+    background-color: #0B56F7;
     color: white;
 }
+
+.copart-main {
+    background-color: #1A1A1A;
+    height: 3rem;
+}
+
+.copart-main .nav-link {
+    color: #fff;
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+}
+
+.copart-main .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.btn-copart-warning {
+    background-color: #FFB600;
+    border-color: #FFB600;
+    color: #000;
+}
+
+.btn-copart-warning:hover {
+    background-color: #e6a200;
+    border-color: #e6a200;
+}
+

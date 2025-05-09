@@ -1,8 +1,33 @@
 ﻿@page "/"
 
 
+<MudPaper Height="2500px" Width="100%">
+    
+    <MudCarousel Class="mud-width-full" Style="height:500px;" ShowArrows="@arrows" ShowBullets="@bullets" EnableSwipeGesture="@enableSwipeGesture" AutoCycle="@autocycle" TData="object">
+        <MudCarouselItem Transition="transition">
+            <div class="d-flex justify-content-center align-items-center" style="height:100%;">
+                <img src="Resources/Example.png" class="img-fluid" />
+            </div>
+        </MudCarouselItem>
+        <MudCarouselItem Transition="transition">
+            <div class="d-flex justify-content-center align-items-center" style="height:100%;">
+                <img src="Resources/Example-3.png" class="img-fluid" />
+            </div>
+        </MudCarouselItem>
+        <MudCarouselItem Transition="transition">
+            <div class="d-flex justify-content-center align-items-center" style="height:100%;">
+                <img src="Resources/Example-2.png" class="img-fluid" />
+            </div>
+        </MudCarouselItem>
+    </MudCarousel>
+   
+</MudPaper>
 
-@code
-{
-
+@code {
+    private bool arrows = true;
+    private bool bullets = true;
+    private bool enableSwipeGesture = true;
+    private bool autocycle = true;
+    private Transition transition = Transition.Slide;
 }
+

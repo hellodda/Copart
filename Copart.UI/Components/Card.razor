@@ -1,0 +1,33 @@
+﻿@using MudBlazor
+
+<MudCard Color="Color" Class="lot-card mx-auto my-3" Elevation="6" Style="max-width: 300px;">
+    <MudCardHeader Class="px-3 py-2">
+        <MudText Typo="Typo.h6" Color="Color.Primary">lot id: @LotId</MudText>
+    </MudCardHeader>
+
+    @if (!string.IsNullOrEmpty(ImageUrl))
+    {
+        <MudCardMedia Image="@ImageUrl" Height="180" Class="rounded" />
+    }
+
+    <MudCardContent Class="px-3 py-2">
+        <MudText Typo="Typo.subtitle1" Class="fw-bold">Price: @(Price.ToString() + "$")</MudText>
+    </MudCardContent>
+
+    <MudCardActions Class="px-3 pb-3">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
+        OnClick="() => OnViewDetails.InvokeAsync(LotId)">
+            View Details
+        </MudButton>
+    </MudCardActions>
+</MudCard>
+
+
+
+@code {
+    [Parameter] public Color Color { get; set; } = Color.Default;
+    [Parameter] public string LotId { get; set; } = "#DJIDUW933922392";
+    [Parameter] public decimal Price { get; set; }
+    [Parameter] public string ImageUrl { get; set; } = "Resources/Test.jpg";
+    [Parameter] public EventCallback<string> OnViewDetails { get; set; }
+}

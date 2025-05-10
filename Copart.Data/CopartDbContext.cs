@@ -10,11 +10,12 @@ namespace Copart.Data
         public DbSet<Lot> Lots { get; set; } = default!;
         public DbSet<User> Users { get; set; } = default!;
 
-        public CopartDbContext(DbContextOptions<CopartDbContext> options) : base(options) {}
+        public CopartDbContext(DbContextOptions<CopartDbContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new VehiclesConfiguration());
+            modelBuilder.ApplyConfiguration(new LotConfiguration());
             base.OnModelCreating(modelBuilder);
         }
     }
@@ -29,4 +30,15 @@ namespace Copart.Data
             builder.Property(vhs => vhs.Model).IsRequired();
         }
     }
+
+    internal class LotConfiguration : IEntityTypeConfiguration<Lot>
+    {
+        public void Configure(EntityTypeBuilder<Lot> builder)
+        {
+            builder.HasKey(l => l.Id);
+            builder.Property(l => l.LotNumber).IsRequired();
+            builder.HasOne(l => l.Vehicle);
+        }
+    }
+
 }

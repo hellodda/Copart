@@ -4,6 +4,8 @@
     {
         public IVehicleRepository VehicleRepository { get; set; }
 
+        public ILotRepository LotRepository { get; set; }
+
         public Task Save(CancellationToken token = default);
         public void Dispose();
     }

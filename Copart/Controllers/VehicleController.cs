@@ -1,4 +1,4 @@
-﻿using Copart.BLL.Models;
+﻿using Copart.BLL.Models.VehicleModels;
 using Copart.BLL.Services.VehicleService;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -63,9 +63,9 @@ namespace Copart.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update([FromRoute] int id, CancellationToken token)
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] VehicleUpdateModel vehicle, CancellationToken token)
         {
-            var result = await _service.Update(id, token);
+            var result = await _service.Update(id, vehicle, token);
             if (result.Success)
             {
                 return Ok(result.Message);

@@ -26,7 +26,6 @@ namespace Copart.Data.Repositories
             try
             {
                 await _context.Vehicles.AddAsync(vehicle, cancellationToken);
-                await _context.SaveChangesAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -38,9 +37,7 @@ namespace Copart.Data.Repositories
         {
             try
             {
-                return await _context.Vehicles
-                                     .AsNoTracking()
-                                     .FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
+                return await _context.Vehicles.FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -53,9 +50,7 @@ namespace Copart.Data.Repositories
         {
             try
             {
-                return await _context.Vehicles
-                                     .AsNoTracking()
-                                     .ToListAsync(cancellationToken);
+                return await _context.Vehicles.ToListAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -68,10 +63,7 @@ namespace Copart.Data.Repositories
         {
             try
             {
-                return await _context.Vehicles
-                                     .AsNoTracking()
-                                     .Where(v => v.Make == make)
-                                     .ToListAsync(cancellationToken);
+                return await _context.Vehicles.Where(v => v.Make == make).ToListAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -84,10 +76,7 @@ namespace Copart.Data.Repositories
         {
             try
             {
-                return await _context.Vehicles
-                                     .AsNoTracking()
-                                     .Where(v => v.Model == model)
-                                     .ToListAsync(cancellationToken);
+                return await _context.Vehicles.Where(v => v.Model == model).ToListAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -100,9 +89,7 @@ namespace Copart.Data.Repositories
         {
             try
             {
-                return await _context.Vehicles
-                                     .AsNoTracking()
-                                     .FirstOrDefaultAsync(v => v.Vin == vin, cancellationToken);
+                return await _context.Vehicles.FirstOrDefaultAsync(v => v.Vin == vin, cancellationToken);
             }
             catch (Exception ex)
             {

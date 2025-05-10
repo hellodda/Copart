@@ -8,15 +8,18 @@ namespace Copart.Data.Repositories
 
         public UnitOfWork(
             CopartDbContext context,
-            IVehicleRepository vehicleRepository
+            IVehicleRepository vehicleRepository,
+            ILotRepository lotRepository
         )
         {
             _context = context;
 
             VehicleRepository = vehicleRepository;
+            LotRepository = lotRepository;
         }
 
         public IVehicleRepository VehicleRepository { get; set; }
+        public ILotRepository LotRepository { get; set; }
 
         public void Dispose()
         {

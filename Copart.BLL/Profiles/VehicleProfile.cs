@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Copart.BLL.Models;
+using Copart.BLL.Models.VehicleModels;
 using Copart.Domain.Entities;
 
 namespace Copart.BLL.Profiles

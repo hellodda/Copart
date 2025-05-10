@@ -1,10 +1,9 @@
 ﻿using AutoMapper;
-using Copart.BLL.Models;
+using Copart.BLL.Models.VehicleModels;
 using Copart.BLL.Results;
 using Copart.Domain.BaseRepositories;
 using Copart.Domain.Entities;
 using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
 
 namespace Copart.BLL.Services.VehicleService
 {
@@ -62,10 +61,11 @@ namespace Copart.BLL.Services.VehicleService
             return Result<IEnumerable<VehicleModel>>.Ok(v.Select(v => _mapper.Map<VehicleModel>(v)));
         }
 
-        public async Task<Result> Update(int id, CancellationToken token = default)
+        public async Task<Result> Update(int id, VehicleUpdateModel vehicle, CancellationToken token = default)
         {
             var v = await _uow.VehicleRepository.GetByIdAsync(id, token);
-            _uow.VehicleRepository.Update(v);
+            if (v is null) return Result.Fail("Vehicle not found");
+            _uow.VehicleRepository.Update(_mapper.Map<Vehicle>(vehicle));
             await _uow.Save(token);
             return Result.Ok("Updated");
         }

@@ -7,6 +7,8 @@ namespace Copart.Data
     public class CopartDbContext : DbContext
     {
         public DbSet<Vehicle> Vehicles { get; set; } = default!;
+        public DbSet<Lot> Lots { get; set; } = default!;
+        public DbSet<User> Users { get; set; } = default!;
 
         public CopartDbContext(DbContextOptions<CopartDbContext> options) : base(options) {}
 

@@ -4,6 +4,7 @@
     {
         public int Id { get; set; }
         public string LotNumber { get; set; } = default!;
+        public int VehicleId { get; set; }
         public Vehicle Vehicle { get; set; } = default!;
         public decimal MinimalBid { get; set; }
         public decimal CurrentBid { get; set; }

@@ -53,7 +53,7 @@ namespace Copart.Data.Repositories
             _logger.LogDebug("GetAllAsync invoked");
             try
             {
-                var list = await _context.Lots.ToListAsync(token);
+                var list = await _context.Lots.Include(e => e.Vehicle).ToListAsync(token);
                 _logger.LogInformation("GetAllAsync retrieved {Count} lots", list.Count);
                 return list;
             }

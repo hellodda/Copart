@@ -4,6 +4,7 @@ using Copart.BLL.Results;
 using Copart.Domain.BaseRepositories;
 using Copart.Domain.Entities;
 using Microsoft.Extensions.Logging;
+using System.Text;
 
 namespace Copart.BLL.Services.LotService
 {
@@ -26,6 +27,9 @@ namespace Copart.BLL.Services.LotService
             try
             {
                 var entity = _mapper.Map<Lot>(lot);
+
+                entity.LotNumber = Convert.ToBase64String(Encoding.UTF8.GetBytes(entity.Vehicle.Vin));
+
                 await _uow.LotRepository.AddAsync(entity, token);
                 await _uow.Save(token);
                 _logger.LogInformation("Lot added successfully with Id {Id}", entity.Id);

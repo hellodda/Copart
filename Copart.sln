@@ -12,6 +12,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Copart.Domain", "Copart.Dom
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Copart.UI", "Copart.UI\Copart.UI.csproj", "{26385303-97B1-431F-8473-3A037CF4BF8F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Copart.AppHost", "Copart.AppHost\Copart.AppHost.csproj", "{AA7FD6B4-C1B8-4CBF-8F7C-16F7697CD6C5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Copart.ServiceDefaults", "Copart.ServiceDefaults\Copart.ServiceDefaults.csproj", "{D9AF0341-3CFA-B20D-5C09-5C9F4ECE740D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,6 +42,14 @@ Global
 		{26385303-97B1-431F-8473-3A037CF4BF8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{26385303-97B1-431F-8473-3A037CF4BF8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{26385303-97B1-431F-8473-3A037CF4BF8F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA7FD6B4-C1B8-4CBF-8F7C-16F7697CD6C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA7FD6B4-C1B8-4CBF-8F7C-16F7697CD6C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA7FD6B4-C1B8-4CBF-8F7C-16F7697CD6C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA7FD6B4-C1B8-4CBF-8F7C-16F7697CD6C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9AF0341-3CFA-B20D-5C09-5C9F4ECE740D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9AF0341-3CFA-B20D-5C09-5C9F4ECE740D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9AF0341-3CFA-B20D-5C09-5C9F4ECE740D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9AF0341-3CFA-B20D-5C09-5C9F4ECE740D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

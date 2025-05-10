@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Copart.BLL\Copart.BLL.csproj" />
     <ProjectReference Include="..\Copart.Data\Copart.Data.csproj" />
+    <ProjectReference Include="..\Copart.ServiceDefaults\Copart.ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>

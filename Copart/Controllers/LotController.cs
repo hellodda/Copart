@@ -33,7 +33,7 @@ namespace Copart.Api.Controllers
             return Ok(result.Data);
         }
 
-        [HttpGet("{lotNumber}")]
+        [HttpGet("{lotNumber:alpha}")]
         public async Task<IActionResult> GetByLotNumber([FromRoute] string lotNumber, CancellationToken token)
         {
             var result = await _service.GetByLotNumber(lotNumber, token);

@@ -15,8 +15,7 @@
                 </a>
 
                 <form class="d-flex flex-grow-1 mx-3" style="max-width: 700px;">
-                    <input class="form-control me-2" type="search" placeholder="Vin, Damage, Color, ..." aria-label="Search" style="min-width: 0;">
-                    <button class="btn btn-warning px-3" type="submit">Search</button>
+                   <SearchBox Items="test" PlaceHolder="Vin, Damage, Model, ..."/>
                 </form>
 
                 <div class="d-flex align-items-center gap-2">
@@ -49,3 +48,6 @@
         </article>
     </main>
 </div>
+@code{
+    List<string> test = new();
+}

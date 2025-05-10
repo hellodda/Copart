@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Copart.Domain\Copart.Domain.csproj" />
+    <ProjectReference Include="..\Copart.Data\Copart.Data.csproj" />
   </ItemGroup>
 
 </Project>

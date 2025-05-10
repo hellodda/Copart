@@ -109,7 +109,7 @@ namespace Copart.BLL.Services.VehicleService
             try
             {
                 var v = await _uow.VehicleRepository.GetByMakeAsync(make, token);
-                var list = v.Select(x => _mapper.Map<VehicleModel>(x));
+                var list = v!.Select(x => _mapper.Map<VehicleModel>(x));
                 _logger.LogInformation("Retrieved {Count} vehicles with make '{Make}'", list.Count(), make);
                 return Result<IEnumerable<VehicleModel>>.Ok(list);
             }
@@ -126,7 +126,7 @@ namespace Copart.BLL.Services.VehicleService
             try
             {
                 var v = await _uow.VehicleRepository.GetByModelAsync(model, token);
-                var list = v.Select(x => _mapper.Map<VehicleModel>(x));
+                var list = v!.Select(x => _mapper.Map<VehicleModel>(x));
                 _logger.LogInformation("Retrieved {Count} vehicles with model '{Model}'", list.Count(), model);
                 return Result<IEnumerable<VehicleModel>>.Ok(list);
             }

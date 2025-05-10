@@ -1,4 +1,6 @@
+using Copart.Api.Extensions;
 using Copart.Api.Middlewares;
+using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +9,7 @@ builder.AddServiceDefaults();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Configure();
 
 var app = builder.Build();
 

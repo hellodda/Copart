@@ -4,7 +4,7 @@ using Copart.Domain.Entities;
 
 namespace Copart.BLL.Profiles
 {
-    internal class LotProfile : Profile
+    public class LotProfile : Profile
     {
         public LotProfile()
         {

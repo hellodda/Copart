@@ -1,6 +1,7 @@
 ﻿using Copart.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Reflection.Emit;
 
 namespace Copart.Data
 {
@@ -38,6 +39,12 @@ namespace Copart.Data
             builder.HasKey(l => l.Id);
             builder.Property(l => l.LotNumber).IsRequired();
             builder.HasOne(l => l.Vehicle);
+           
+            builder.Property(p => p.CurrentBid)
+            .HasPrecision(18, 2); 
+
+            builder.Property(p => p.MinimalBid)
+            .HasPrecision(18, 2);
         }
     }
 

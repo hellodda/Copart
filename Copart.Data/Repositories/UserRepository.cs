@@ -5,55 +5,55 @@ using Microsoft.Extensions.Logging;
 
 namespace Copart.Data.Repositories
 {
-    public class BidderRepository : IBidderRepository
+    public class UserRepository : IUserRepository
     {
         private readonly CopartDbContext _context;
-        private readonly ILogger<BidderRepository> _logger;
+        private readonly ILogger<UserRepository> _logger;
 
-        public BidderRepository(CopartDbContext context, ILogger<BidderRepository> logger)
+        public UserRepository(CopartDbContext context, ILogger<UserRepository> logger)
         {
             _context = context;
             _logger = logger;
         }
 
-        public async Task AddAsync(Bidder bidder, CancellationToken token = default)
+        public async Task AddAsync(User user, CancellationToken token = default)
         {
-            _logger.LogInformation("Adding new bidder: {@Bidder}", bidder);
+            _logger.LogInformation("Adding new bidder: {@Bidder}", user);
             try
             {
-                await _context.Bidders.AddAsync(bidder, token);
-                _logger.LogInformation("Bidder added successfully: Id={BidderId}", bidder.Id);
+                await _context.Users.AddAsync(user, token);
+                _logger.LogInformation("Bidder added successfully: Id={BidderId}", user.Id);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error adding bidder: {@Bidder}", bidder);
+                _logger.LogError(ex, "Error adding bidder: {@Bidder}", user);
                 throw;
             }
         }
 
-        public Task DeleteAsync(Bidder bidder, CancellationToken token = default)
+        public Task DeleteAsync(User user, CancellationToken token = default)
         {
-            _logger.LogInformation("Removing bidder: Id={BidderId}", bidder.Id);
+            _logger.LogInformation("Removing bidder: Id={BidderId}", user.Id);
             try
             {
-                _context.Bidders.Remove(bidder);
-                _logger.LogInformation("Bidder removal scheduled: Id={BidderId}", bidder.Id);
+                _context.Users.Remove(user);
+                _logger.LogInformation("Bidder removal scheduled: Id={BidderId}", user.Id);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error removing bidder: Id={BidderId}", bidder.Id);
+                _logger.LogError(ex, "Error removing bidder: Id={BidderId}", user.Id);
                 throw;
             }
 
             return Task.CompletedTask;
         }
 
-        public async Task<IEnumerable<Bidder>> GetAllAsync(CancellationToken token = default)
+        public async Task<IEnumerable<User>> GetAllAsync(CancellationToken token = default)
         {
             _logger.LogInformation("Retrieving all bidders from database");
             try
             {
-                var list = await _context.Bidders.ToListAsync(token);
+                var list = await _context.Users.ToListAsync(token);
                 _logger.LogInformation("Found {Count} bidders", list.Count);
                 return list;
             }
@@ -64,12 +64,12 @@ namespace Copart.Data.Repositories
             }
         }
 
-        public async Task<Bidder?> GetByIdAsync(int id, CancellationToken token = default)
+        public async Task<User?> GetByIdAsync(int id, CancellationToken token = default)
         {
             _logger.LogInformation("Retrieving bidder by Id={BidderId}", id);
             try
             {
-                var bidder = await _context.Bidders.FirstOrDefaultAsync(b => b.Id == id, token);
+                var bidder = await _context.Users.FirstOrDefaultAsync(b => b.Id == id, token);
                 if (bidder is null)
                     _logger.LogWarning("Bidder not found: Id={BidderId}", id);
                 else
@@ -84,17 +84,17 @@ namespace Copart.Data.Repositories
             }
         }
 
-        public Task UpdateAsync(Bidder bidder, CancellationToken token = default)
+        public Task UpdateAsync(User user, CancellationToken token = default)
         {
-            _logger.LogInformation("Updating bidder: {@Bidder}", bidder);
+            _logger.LogInformation("Updating bidder: {@Bidder}", user);
             try
             {
-                _context.Bidders.Update(bidder);
-                _logger.LogInformation("Bidder updated successfully: Id={BidderId}", bidder.Id);
+                _context.Users.Update(user);
+                _logger.LogInformation("Bidder updated successfully: Id={BidderId}", user.Id);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating bidder: {@Bidder}", bidder);
+                _logger.LogError(ex, "Error updating bidder: {@Bidder}", user);
                 throw;
             }
 

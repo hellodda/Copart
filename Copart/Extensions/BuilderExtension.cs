@@ -14,10 +14,6 @@ namespace Copart.Api.Extensions
     {
         public static void Configure(this WebApplicationBuilder builder)
         {
-            builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
-            builder.Services.AddScoped<ILotRepository, LotRepository>();
-            builder.Services.AddScoped<IBidRepository, BidRepository>();
-            builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IVehicleService, VehicleService>();
             builder.Services.AddScoped<ILotService, LotService>();

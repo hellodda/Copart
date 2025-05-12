@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Copart.BLL.Services.VehicleService
 {
-    public class VehicleService : IVehicleService
+    public sealed class VehicleService : IVehicleService
     {
         private readonly IUnitOfWork _uow;
         private readonly ILogger<VehicleService> _logger;
@@ -20,146 +20,144 @@ namespace Copart.BLL.Services.VehicleService
             _mapper = mapper;
         }
 
-        public async Task<Result> Add(VehicleAddModel vehicle, CancellationToken token = default)
+        public async Task<Result> AddAsync(VehicleAddModel model, CancellationToken token = default)
         {
-            _logger.LogInformation("Adding new vehicle: {@Vehicle}", vehicle);
+            _logger.LogDebug("AddAsync invoked with VehicleAddModel: {@Model}", model);
             try
             {
-                var entity = _mapper.Map<Vehicle>(vehicle);
-                await _uow.VehicleRepository.AddAsync(entity, token);
-                await _uow.Save(token);
-                _logger.LogInformation("Vehicle added successfully with Id {Id}", entity.Id);
+                var entity = _mapper.Map<Vehicle>(model);
+                await _uow.VehicleRepository.AddAsync(entity, token).ConfigureAwait(false);
+                await _uow.Save(token).ConfigureAwait(false);
+                _logger.LogInformation("Vehicle added successfully: Id={VehicleId}", entity.Id);
                 return Result.Ok();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error adding vehicle: {@Vehicle}", vehicle);
-                return Result.Fail("Error adding vehicle");
+                _logger.LogError(ex, "Error adding vehicle: {@Model}", model);
+                return Result.Fail("An error occurred while adding the vehicle.");
             }
         }
 
-        public async Task<Result> Delete(int id, CancellationToken token = default)
+        public async Task<Result> DeleteAsync(int id, CancellationToken token = default)
         {
-            _logger.LogInformation("Deleting vehicle with Id {Id}", id);
+            _logger.LogDebug("DeleteAsync invoked for Vehicle Id={VehicleId}", id);
             try
             {
-                var v = await _uow.VehicleRepository.GetByIdAsync(id, token);
-                if (v is null)
+                var entity = await _uow.VehicleRepository.GetByIdAsync(id, token).ConfigureAwait(false);
+                if (entity is null)
                 {
-                    _logger.LogWarning("Vehicle with Id {Id} not found for deletion", id);
-                    return Result.Fail($"Vehicle with id {id} not found");
+                    _logger.LogWarning("DeleteAsync failed: Vehicle not found, Id={VehicleId}", id);
+                    return Result.Fail("Vehicle not found");
                 }
 
-                _uow.VehicleRepository.Delete(v);
-                await _uow.Save(token);
-                _logger.LogInformation("Vehicle with Id {Id} deleted successfully", id);
-                return Result.Ok("Deleted");
+                await _uow.VehicleRepository.DeleteAsync(entity).ConfigureAwait(false);
+                await _uow.Save(token).ConfigureAwait(false);
+                _logger.LogInformation("Vehicle deleted successfully: Id={VehicleId}", id);
+                return Result.Ok("Vehicle deleted");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting vehicle with Id {Id}", id);
-                return Result.Fail("Error deleting vehicle");
+                _logger.LogError(ex, "Error deleting vehicle Id={VehicleId}", id);
+                return Result.Fail("An error occurred while deleting the vehicle.");
             }
         }
 
-        public async Task<Result<IEnumerable<VehicleModel>>> GetAll(CancellationToken token = default)
+        public async Task<Result<IEnumerable<VehicleModel>>> GetAllAsync(CancellationToken token = default)
         {
-            _logger.LogInformation("Retrieving all vehicles");
+            _logger.LogDebug("GetAllAsync invoked");
             try
             {
-                var vs = (await _uow.VehicleRepository.GetAllAsync(token))
-                    .Select(v => _mapper.Map<VehicleModel>(v));
-
-                _logger.LogInformation("Retrieved {Count} vehicles", vs.Count());
-                return Result<IEnumerable<VehicleModel>>.Ok(vs);
+                var entities = await _uow.VehicleRepository.GetAllAsync(token).ConfigureAwait(false);
+                var models = entities?.Select(v => _mapper.Map<VehicleModel>(v));
+                _logger.LogInformation("Retrieved {Count} vehicles", models?.Count());
+                return Result<IEnumerable<VehicleModel>>.Ok(models);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving all vehicles");
-                return Result<IEnumerable<VehicleModel>>.Fail("Error retrieving vehicles");
+                return Result<IEnumerable<VehicleModel>>.Fail("An error occurred while retrieving vehicles.");
             }
         }
 
-        public async Task<Result<VehicleModel>> GetById(int id, CancellationToken token = default)
+        public async Task<Result<VehicleModel>> GetByIdAsync(int id, CancellationToken token = default)
         {
-            _logger.LogInformation("Retrieving vehicle with Id {Id}", id);
+            _logger.LogDebug("GetByIdAsync invoked for Vehicle Id={VehicleId}", id);
             try
             {
-                var v = await _uow.VehicleRepository.GetByIdAsync(id, token);
-                if (v is null)
+                var entity = await _uow.VehicleRepository.GetByIdAsync(id, token).ConfigureAwait(false);
+                if (entity is null)
                 {
-                    _logger.LogWarning("Vehicle with Id {Id} not found", id);
+                    _logger.LogWarning("GetByIdAsync failed: Vehicle not found, Id={VehicleId}", id);
                     return Result<VehicleModel>.Fail("Vehicle not found");
                 }
 
-                var model = _mapper.Map<VehicleModel>(v);
-                _logger.LogInformation("Vehicle with Id {Id} retrieved successfully", id);
+                var model = _mapper.Map<VehicleModel>(entity);
+                _logger.LogInformation("Vehicle retrieved successfully: Id={VehicleId}", id);
                 return Result<VehicleModel>.Ok(model);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving vehicle with Id {Id}", id);
-                return Result<VehicleModel>.Fail("Error retrieving vehicle");
+                _logger.LogError(ex, "Error retrieving vehicle Id={VehicleId}", id);
+                return Result<VehicleModel>.Fail("An error occurred while retrieving the vehicle.");
             }
         }
 
-        public async Task<Result<IEnumerable<VehicleModel>>> GetByMake(string make, CancellationToken token = default)
+        public async Task<Result<IEnumerable<VehicleModel>>> GetByMakeAsync(string make, CancellationToken token = default)
         {
-            _logger.LogInformation("Retrieving vehicles with make '{Make}'", make);
+            _logger.LogDebug("GetByMakeAsync invoked with Make={Make}", make);
             try
             {
-                var v = await _uow.VehicleRepository.GetByMakeAsync(make, token);
-                var list = v!.Select(x => _mapper.Map<VehicleModel>(x));
-                _logger.LogInformation("Retrieved {Count} vehicles with make '{Make}'", list.Count(), make);
-                return Result<IEnumerable<VehicleModel>>.Ok(list);
+                var entities = await _uow.VehicleRepository.GetByMakeAsync(make, token).ConfigureAwait(false);
+                var models = entities?.Select(v => _mapper.Map<VehicleModel>(v));
+                _logger.LogInformation("Retrieved {Count} vehicles for make '{Make}'", models?.Count(), make);
+                return Result<IEnumerable<VehicleModel>>.Ok(models);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving vehicles with make '{Make}'", make);
-                return Result<IEnumerable<VehicleModel>>.Fail("Error retrieving vehicles by make");
+                _logger.LogError(ex, "Error retrieving vehicles by make '{Make}'", make);
+                return Result<IEnumerable<VehicleModel>>.Fail("An error occurred while retrieving vehicles by make.");
             }
         }
 
-        public async Task<Result<IEnumerable<VehicleModel>>> GetByModel(string model, CancellationToken token = default)
+        public async Task<Result<IEnumerable<VehicleModel>>> GetByModelAsync(string modelName, CancellationToken token = default)
         {
-            _logger.LogInformation("Retrieving vehicles with model '{Model}'", model);
+            _logger.LogDebug("GetByModelAsync invoked with Model={Model}", modelName);
             try
             {
-                var v = await _uow.VehicleRepository.GetByModelAsync(model, token);
-                var list = v!.Select(x => _mapper.Map<VehicleModel>(x));
-                _logger.LogInformation("Retrieved {Count} vehicles with model '{Model}'", list.Count(), model);
-                return Result<IEnumerable<VehicleModel>>.Ok(list);
+                var entities = await _uow.VehicleRepository.GetByModelAsync(modelName, token).ConfigureAwait(false);
+                var models = entities?.Select(v => _mapper.Map<VehicleModel>(v));
+                _logger.LogInformation("Retrieved {Count} vehicles for model '{Model}'", models?.Count(), modelName);
+                return Result<IEnumerable<VehicleModel>>.Ok(models);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving vehicles with model '{Model}'", model);
-                return Result<IEnumerable<VehicleModel>>.Fail("Error retrieving vehicles by model");
+                _logger.LogError(ex, "Error retrieving vehicles by model '{Model}'", modelName);
+                return Result<IEnumerable<VehicleModel>>.Fail("An error occurred while retrieving vehicles by model.");
             }
         }
 
-        public async Task<Result> Update(int id, VehicleUpdateModel vehicle, CancellationToken token = default)
+        public async Task<Result> UpdateAsync(int id, VehicleUpdateModel model, CancellationToken token = default)
         {
-            _logger.LogInformation("Updating vehicle with Id {Id}: {@Vehicle}", id, vehicle);
+            _logger.LogDebug("UpdateAsync invoked for Vehicle Id={VehicleId} with VehicleUpdateModel: {@Model}", id, model);
             try
             {
-                var v = await _uow.VehicleRepository.GetByIdAsync(id, token);
-                if (v is null)
+                var existing = await _uow.VehicleRepository.GetByIdAsync(id, token).ConfigureAwait(false);
+                if (existing is null)
                 {
-                    _logger.LogWarning("Vehicle with Id {Id} not found for update", id);
+                    _logger.LogWarning("UpdateAsync failed: Vehicle not found, Id={VehicleId}", id);
                     return Result.Fail("Vehicle not found");
                 }
 
-                var entity = _mapper.Map<Vehicle>(vehicle);
-                entity.Id = id; // ensure correct Id
-                _uow.VehicleRepository.Update(entity);
-                await _uow.Save(token);
-                _logger.LogInformation("Vehicle with Id {Id} updated successfully", id);
-                return Result.Ok("Updated");
+                _mapper.Map(model, existing);
+                await _uow.VehicleRepository.UpdateAsync(existing).ConfigureAwait(false);
+                await _uow.Save(token).ConfigureAwait(false);
+                _logger.LogInformation("Vehicle updated successfully: Id={VehicleId}", id);
+                return Result.Ok("Vehicle updated");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating vehicle with Id {Id}: {@Vehicle}", id, vehicle);
-                return Result.Fail("Error updating vehicle");
+                _logger.LogError(ex, "Error updating vehicle Id={VehicleId}", id);
+                return Result.Fail("An error occurred while updating the vehicle.");
             }
         }
     }

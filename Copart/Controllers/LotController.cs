@@ -1,11 +1,12 @@
-﻿using Copart.BLL.Models.LotModels;
+﻿using Copart.BLL.Models.BidModels;
+using Copart.BLL.Models.LotModels;
 using Copart.BLL.Services.LotService;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Copart.Api.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class LotController : ControllerBase
     {
         private readonly ILotService _service;
@@ -20,58 +21,129 @@ namespace Copart.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll(CancellationToken token)
         {
-            var result = await _service.GetAll(token);
-            if (!result.Success) BadRequest(result.Message);
+            _logger.LogDebug("GET /api/Lot called");
+            var result = await _service.GetAllAsync(token);
+            if (!result.Success)
+            {
+                _logger.LogWarning("GetAll failed: {Message}", result.Message);
+                return BadRequest(result.Message);
+            }
             return Ok(result.Data);
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetById([FromRoute] int id, CancellationToken token)
+        public async Task<IActionResult> GetById(int id, CancellationToken token)
         {
-            var result = await _service.GetById(id, token);
-            if (!result.Success) return BadRequest(result.Message);
+            _logger.LogDebug("GET /api/Lot/{Id} called", id);
+            var result = await _service.GetByIdAsync(id, token);
+            if (!result.Success)
+            {
+                _logger.LogWarning("GetById failed for Id={Id}: {Message}", id, result.Message);
+                return NotFound(result.Message);
+            }
             return Ok(result.Data);
         }
 
-        [HttpGet("{lotNumber}")]
-        public async Task<IActionResult> GetByLotNumber([FromRoute] string lotNumber, CancellationToken token)
+        [HttpGet("by-number/{lotNumber}")]
+        public async Task<IActionResult> GetByLotNumber(string lotNumber, CancellationToken token)
         {
-            var result = await _service.GetByLotNumber(lotNumber, token);
-            if (!result.Success) return BadRequest(result.Message);
+            _logger.LogDebug("GET /api/Lot/by-number/{LotNumber} called", lotNumber);
+            var result = await _service.GetByLotNumberAsync(lotNumber, token);
+            if (!result.Success)
+            {
+                _logger.LogWarning("GetByLotNumber failed for Number={LotNumber}: {Message}", lotNumber, result.Message);
+                return NotFound(result.Message);
+            }
             return Ok(result.Data);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] LotAddModel lot, CancellationToken token)
+        public async Task<IActionResult> Add([FromBody] LotAddModel model, CancellationToken token)
         {
-            var result = await _service.Add(lot, token);
-            if (!result.Success) return BadRequest(result.Message);
+            _logger.LogDebug("POST /api/Lot called with {@Model}", model);
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Add ModelState invalid: {@Errors}", ModelState);
+                return BadRequest(ModelState);
+            }
+
+            var result = await _service.AddAsync(model, token);
+            if (!result.Success)
+            {
+                _logger.LogWarning("Add failed: {Message}", result.Message);
+                return BadRequest(result.Message);
+            }
+
+            return CreatedAtAction(nameof(GetById), result.Message);
+        }
+
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(int id, [FromBody] LotUpdateModel model, CancellationToken token)
+        {
+            _logger.LogDebug("PUT /api/Lot/{Id} called with {@Model}", id, model);
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Update ModelState invalid: {@Errors}", ModelState);
+                return BadRequest(ModelState);
+            }
+
+            var result = await _service.UpdateAsync(id, model, token);
+            if (!result.Success)
+            {
+                _logger.LogWarning("Update failed for Id={Id}: {Message}", id, result.Message);
+                return result.Message!.Contains("not found")
+                    ? NotFound(result.Message)
+                    : BadRequest(result.Message);
+            }
+
             return Ok(result.Message);
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update([FromBody] LotUpdateModel lot, [FromRoute] int id, CancellationToken token)
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id, CancellationToken token)
         {
-            var result = await _service.Update(id, lot, token);
-            if (!result.Success) return BadRequest(result.Message);
+            _logger.LogDebug("DELETE /api/Lot/{Id} called", id);
+            var result = await _service.DeleteAsync(id, token);
+            if (!result.Success)
+            {
+                _logger.LogWarning("Delete failed for Id={Id}: {Message}", id, result.Message);
+                return NotFound(result.Message);
+            }
             return Ok(result.Message);
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete([FromRoute] int id, CancellationToken token)
+        [HttpGet("{id:int}/biggest")]
+        public async Task<IActionResult> GetBiggestBid(int id, CancellationToken token)
         {
-            var result = await _service.Delete(id, token);
-            if (!result.Success) return BadRequest(result.Message);
-            return Ok(result.Message);
-        }
-
-        [HttpGet("/biggest")]
-        public async Task<IActionResult> GetBiggesBid([FromRoute] int id, CancellationToken token)
-        {
-            var result = await _service.GetBiggestBid(id, token);
-            if (!result.Success) return BadRequest(result.Message);
+            _logger.LogDebug("GET /api/Lot/{Id}/biggest called", id);
+            var result = await _service.GetBiggestBidAsync(id, token);
+            if (!result.Success)
+            {
+                _logger.LogWarning("GetBiggestBid failed for Id={Id}: {Message}", id, result.Message);
+                return NotFound(result.Message);
+            }
             return Ok(result.Data);
         }
 
+        [HttpPatch("{id:int}/bids")]
+        public async Task<IActionResult> AddBid(int id, [FromBody] BidAddModel bid, CancellationToken token)
+        {
+            _logger.LogDebug("PATCH /api/Lot/{Id}/bids called with {@Bid}", id, bid);
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("AddBid ModelState invalid: {@Errors}", ModelState);
+                return BadRequest(ModelState);
+            }
+
+            var result = await _service.AddBidAsync(id, bid, token);
+            if (!result.Success)
+            {
+                _logger.LogWarning("AddBid failed for Id={Id}: {Message}", id, result.Message);
+                return result.Message!.Contains("not found")
+                    ? NotFound(result.Message)
+                    : BadRequest(result.Message);
+            }
+            return Ok(result.Message);
+        }
     }
 }

@@ -1,19 +1,16 @@
 ﻿using Copart.Domain.BaseRepositories;
 using Copart.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace Copart.Data.Repositories
 {
-    public class VehicleRepository : IVehicleRepository
+    public sealed class VehicleRepository : IVehicleRepository
     {
         private readonly CopartDbContext _context;
-        private readonly ILogger<VehicleRepository> _logger;
 
-        public VehicleRepository(CopartDbContext context, ILogger<VehicleRepository> logger)
+        public VehicleRepository(CopartDbContext context)
         {
             _context = context;
-            _logger = logger;
         }
 
         public IQueryable<Vehicle> Query()
@@ -23,103 +20,61 @@ namespace Copart.Data.Repositories
 
         public async Task AddAsync(Vehicle vehicle, CancellationToken cancellationToken = default)
         {
-            try
-            {
-                await _context.Vehicles.AddAsync(vehicle, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to add Vehicle {@Vehicle}", vehicle);
-            }
+            await _context.Vehicles.AddAsync(vehicle, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<Vehicle?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
-            try
-            {
-                return await _context.Vehicles.FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to retrieve Vehicle with Id={VehicleId}", id);
-                return null;
-            }
+            return await _context.Vehicles
+                .AsNoTracking()
+                .FirstOrDefaultAsync(v => v.Id == id, cancellationToken)
+                .ConfigureAwait(false);
         }
 
-        public async Task<IEnumerable<Vehicle>?> GetAllAsync(CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<Vehicle?>?> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            try
-            {
-                return await _context.Vehicles.ToListAsync(cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to retrieve all Vehicles");
-                return null;
-            }
+            return await _context.Vehicles
+                .AsNoTracking()
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
         }
 
-        public async Task<IEnumerable<Vehicle>?> GetByMakeAsync(string make, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<Vehicle?>?> GetByMakeAsync(string make, CancellationToken cancellationToken = default)
         {
-            try
-            {
-                return await _context.Vehicles.Where(v => v.Make == make).ToListAsync(cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to retrieve Vehicles by Make={Make}", make);
-                return null;
-            }
+            return await _context.Vehicles
+                .AsNoTracking()
+                .Where(v => v.Make == make)
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
         }
 
-        public async Task<IEnumerable<Vehicle>?> GetByModelAsync(string model, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<Vehicle?>?> GetByModelAsync(string model, CancellationToken cancellationToken = default)
         {
-            try
-            {
-                return await _context.Vehicles.Where(v => v.Model == model).ToListAsync(cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to retrieve Vehicles by Model={Model}", model);
-                return null;
-            }
+            return await _context.Vehicles
+                .AsNoTracking()
+                .Where(v => v.Model == model)
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
         }
 
         public async Task<Vehicle?> GetByVinAsync(string vin, CancellationToken cancellationToken = default)
         {
-            try
-            {
-                return await _context.Vehicles.FirstOrDefaultAsync(v => v.Vin == vin, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to retrieve Vehicle by VIN={Vin}", vin);
-                return null;
-            }
+            return await _context.Vehicles
+                .AsNoTracking()
+                .FirstOrDefaultAsync(v => v.Vin == vin, cancellationToken)
+                .ConfigureAwait(false);
         }
 
-        public void Update(Vehicle vehicle)
+        public Task UpdateAsync(Vehicle vehicle)
         {
-            try
-            {
-                _context.Vehicles.Update(vehicle);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to update Vehicle {@Vehicle}", vehicle);
-            }
+            _context.Vehicles.Update(vehicle);
+            return Task.CompletedTask;
         }
 
-        public void Delete(Vehicle vehicle)
+        public Task DeleteAsync(Vehicle vehicle)
         {
-            try
-            {
-                _context.Vehicles.Remove(vehicle);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to delete Vehicle {@Vehicle}", vehicle);
-            }
+            _context.Vehicles.Remove(vehicle);
+            return Task.CompletedTask;
         }
     }
 }

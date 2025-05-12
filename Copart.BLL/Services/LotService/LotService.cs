@@ -1,15 +1,15 @@
 ﻿using AutoMapper;
+using Copart.BLL.Models.BidModels;
 using Copart.BLL.Models.LotModels;
 using Copart.BLL.Results;
 using Copart.Domain.BaseRepositories;
 using Copart.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Text;
 
 namespace Copart.BLL.Services.LotService
 {
-    public class LotService : ILotService
+    public sealed class LotService : ILotService
     {
         private readonly IUnitOfWork _uow;
         private readonly ILogger<LotService> _logger;
@@ -22,160 +22,211 @@ namespace Copart.BLL.Services.LotService
             _logger = logger;
         }
 
-        public async Task<Result> Add(LotAddModel lot, CancellationToken token = default)
+        public async Task<Result> AddAsync(LotAddModel model, CancellationToken token = default)
         {
-            _logger.LogInformation("Adding new lot: {@Lot}", lot);
+            _logger.LogDebug("Add invoked with LotAddModel: {@Model}", model);
             try
             {
-                var entity = _mapper.Map<Lot>(lot);
-
+                var entity = _mapper.Map<Lot>(model);
                 entity.LotNumber = Convert.ToBase64String(Encoding.UTF8.GetBytes(entity.Vehicle.Vin));
 
-                await _uow.LotRepository.AddAsync(entity, token);
-                await _uow.Save(token);
-                _logger.LogInformation("Lot added successfully with Id {Id}", entity.Id);
-                return Result.Ok("lot added");
+                await _uow.LotRepository.AddAsync(entity, token).ConfigureAwait(false);
+                await _uow.Save(token).ConfigureAwait(false);
+
+                _logger.LogInformation("Lot added successfully: Id={LotId}, Number={LotNumber}", entity.Id, entity.LotNumber);
+                return Result.Ok("Lot added");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error adding lot: {@Lot}", lot);
-                return Result.Fail("Error adding lot");
+                _logger.LogError(ex, "Error adding lot: {@Model}", model);
+                return Result.Fail("An error occurred while adding the lot.");
             }
         }
 
-        public async Task<Result> Delete(int id, CancellationToken token = default)
+        public async Task<Result> DeleteAsync(int id, CancellationToken token = default)
         {
-            _logger.LogInformation("Deleting lot with Id {Id}", id);
+            _logger.LogDebug("Delete invoked for Lot Id={LotId}", id);
             try
             {
-                var l = await _uow.LotRepository.GetByIdAsync(id, token);
-                if (l is null)
+                var entity = await _uow.LotRepository.GetByIdAsync(id, token).ConfigureAwait(false);
+                if (entity is null)
                 {
-                    _logger.LogWarning("Lot with Id {Id} not found for deletion", id);
+                    _logger.LogWarning("Delete failed: Lot not found, Id={LotId}", id);
                     return Result.Fail("Lot not found");
                 }
 
-                await _uow.LotRepository.DeleteAsync(l, token);
-                await _uow.Save(token);
-                _logger.LogInformation("Lot with Id {Id} deleted successfully", id);
-                return Result.Ok("Deleted");
+                await _uow.LotRepository.DeleteAsync(entity, token).ConfigureAwait(false);
+                await _uow.Save(token).ConfigureAwait(false);
+
+                _logger.LogInformation("Lot deleted successfully: Id={LotId}", id);
+                return Result.Ok("Lot deleted");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting lot with Id {Id}", id);
-                return Result.Fail("Error deleting lot");
+                _logger.LogError(ex, "Error deleting lot Id={LotId}", id);
+                return Result.Fail("An error occurred while deleting the lot.");
             }
         }
 
-        public async Task<Result<IEnumerable<LotModel>>> GetAll(CancellationToken token = default)
+        public async Task<Result<IEnumerable<LotModel?>?>> GetAllAsync(CancellationToken token = default)
         {
-            _logger.LogInformation("Retrieving all lots");
+            _logger.LogDebug("GetAll invoked");
             try
             {
-                var list = (await _uow.LotRepository.GetAllAsync(token)).Select(l => _mapper.Map<LotModel>(l));
-                _logger.LogInformation("Retrieved {Count} lots", list.Count());
-                return Result<IEnumerable<LotModel>>.Ok(list);
+                var entities = await _uow.LotRepository.GetAllAsync(token).ConfigureAwait(false);
+                var models = entities?.Select(l => _mapper.Map<LotModel>(l));
+
+                _logger.LogInformation("Retrieved {Count} lots", models?.Count());
+                return Result<IEnumerable<LotModel>>.Ok(models)!;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving all lots");
-                return Result<IEnumerable<LotModel>>.Fail("Error retrieving lots");
+                return Result<IEnumerable<LotModel>>.Fail("An error occurred while retrieving lots.")!;
             }
         }
 
-        public async Task<Result<LotModel>> GetById(int id, CancellationToken token = default)
+        public async Task<Result<LotModel?>> GetByIdAsync(int id, CancellationToken token = default)
         {
-            _logger.LogInformation("Retrieving lot with Id {Id}", id);
+            _logger.LogDebug("GetById invoked for Lot Id={LotId}", id);
             try
             {
-                var l = await _uow.LotRepository.GetByIdAsync(id, token);
-                if (l is null)
+                var entity = await _uow.LotRepository.GetByIdAsync(id, token).ConfigureAwait(false);
+                if (entity is null)
                 {
-                    _logger.LogWarning("Lot with Id {Id} not found", id);
-                    return Result<LotModel>.Fail("Lot not found");
+                    _logger.LogWarning("GetById failed: Lot not found, Id={LotId}", id);
+                    return Result<LotModel>.Fail("Lot not found")!;
                 }
 
-                var model = _mapper.Map<LotModel>(l);
-                _logger.LogInformation("Lot with Id {Id} retrieved successfully", id);
-                return Result<LotModel>.Ok(model);
+                var model = _mapper.Map<LotModel>(entity);
+                _logger.LogInformation("Lot retrieved successfully: Id={LotId}", id);
+                return Result<LotModel>.Ok(model)!;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving lot with Id {Id}", id);
-                return Result<LotModel>.Fail("Error retrieving lot");
+                _logger.LogError(ex, "Error retrieving lot Id={LotId}", id);
+                return Result<LotModel>.Fail("An error occurred while retrieving the lot.")!;
             }
         }
 
-        public async Task<Result<LotModel>> GetByLotNumber(string lotNumber, CancellationToken token = default)
+        public async Task<Result<LotModel?>> GetByLotNumberAsync(string lotNumber, CancellationToken token = default)
         {
-            _logger.LogInformation("Retrieving lot with lot number '{LotNumber}'", lotNumber);
+            _logger.LogDebug("GetByLotNumber invoked with Number={LotNumber}", lotNumber);
             try
             {
-                var l = await _uow.LotRepository.GetByLotNumberAsync(lotNumber, token);
-                if (l is null)
+                var entity = await _uow.LotRepository.GetByLotNumberAsync(lotNumber, token).ConfigureAwait(false);
+                if (entity is null)
                 {
-                    _logger.LogWarning("Lot with lot number '{LotNumber}' not found", lotNumber);
-                    return Result<LotModel>.Fail("Lot not found");
+                    _logger.LogWarning("GetByLotNumber failed: Lot not found, Number={LotNumber}", lotNumber);
+                    return Result<LotModel>.Fail("Lot not found")!;
                 }
 
-                var model = _mapper.Map<LotModel>(l);
-                _logger.LogInformation("Lot with lot number '{LotNumber}' retrieved successfully", lotNumber);
-                return Result<LotModel>.Ok(model);
+                var model = _mapper.Map<LotModel>(entity);
+                _logger.LogInformation("Lot retrieved successfully: Number={LotNumber}, Id={LotId}", lotNumber, entity.Id);
+                return Result<LotModel>.Ok(model)!;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving lot with lot number '{LotNumber}'", lotNumber);
-                return Result<LotModel>.Fail("Error retrieving lot by number");
+                _logger.LogError(ex, "Error retrieving lot by number {LotNumber}", lotNumber);
+                return Result<LotModel>.Fail("An error occurred while retrieving the lot by number.")!;
             }
         }
 
-        public async Task<Result> Update(int id, LotUpdateModel lot, CancellationToken token = default)
+        public async Task<Result<BidModel?>> GetBiggestBidAsync(int lotId, CancellationToken token = default)
         {
-            _logger.LogInformation("Updating lot with Id {Id}: {@Lot}", id, lot);
+            _logger.LogDebug("GetBiggestBid invoked for Lot Id={LotId}", lotId);
             try
             {
-                var existing = await _uow.LotRepository.GetByIdAsync(id, token);
-                if (existing is null)
+                var entity = await _uow.LotRepository.GetByIdAsync(lotId, token).ConfigureAwait(false);
+                if (entity is null)
                 {
-                    _logger.LogWarning("Lot with Id {Id} not found for update", id);
+                    _logger.LogWarning("GetBiggestBid failed: Lot not found, Id={LotId}", lotId);
+                    return Result<BidModel>.Fail("Lot not found")!;
+                }
+
+                var topBid = entity.Bids.OrderByDescending(b => b.Amount).FirstOrDefault();
+                if (topBid is null)
+                {
+                    _logger.LogInformation("No bids found for Lot Id={LotId}", lotId);
+                    return Result<BidModel>.Fail("No bids available")!;
+                }
+
+                var model = _mapper.Map<BidModel>(topBid);
+                _logger.LogInformation("Biggest bid: LotId={LotId}, BidId={BidId}, Amount={Amount}", lotId, topBid.Id, topBid.Amount);
+                return Result<BidModel>.Ok(model)!;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving biggest bid for Lot Id={LotId}", lotId);
+                return Result<BidModel>.Fail("An error occurred while retrieving the biggest bid.")!;
+            }
+        }
+
+        public async Task<Result> AddBidAsync(int lotId, BidAddModel model, CancellationToken token = default)
+        {
+            _logger.LogDebug("AddBid invoked for Lot Id={LotId} with BidAddModel: {@BidModel}", lotId, model);
+            try
+            {
+                var entity = await _uow.LotRepository.GetByIdAsync(lotId, token).ConfigureAwait(false);
+                if (entity is null)
+                {
+                    _logger.LogWarning("AddBid failed: Lot not found, Id={LotId}", lotId);
                     return Result.Fail("Lot not found");
                 }
 
-                var entity = _mapper.Map<Lot>(lot);
-                entity.Id = id;
-                await _uow.LotRepository.UpdateAsync(entity, token);
-                await _uow.Save(token);
-                _logger.LogInformation("Lot with Id {Id} updated successfully", id);
-                return Result.Ok("Updated");
+                if (!entity.IsActive)
+                {
+                    _logger.LogWarning("AddBid failed: Lot not active, Id={LotId}", lotId);
+                    return Result.Fail("Lot is not active");
+                }
+
+                if (entity.EndDate < DateTime.UtcNow)
+                {
+                    _logger.LogWarning("AddBid failed: Lot ended, Id={LotId}, EndDate={EndDate}", lotId, entity.EndDate);
+                    return Result.Fail("Lot has ended");
+                }
+
+                var bidEntity = _mapper.Map<Bid>(model);
+                await _uow.LotRepository.AddBidAsync(entity, bidEntity, token).ConfigureAwait(false);
+                await _uow.Save(token).ConfigureAwait(false);
+
+                _logger.LogInformation("Bid added: LotId={LotId}, BidId={BidId}", lotId, bidEntity.Id);
+                return Result.Ok("Bid added to lot");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating lot with Id {Id}: {@Lot}", id, lot);
-                return Result.Fail("Error updating lot");
+                _logger.LogError(ex, "Error adding bid to Lot Id={LotId}", lotId);
+                return Result.Fail("An error occurred while adding the bid.");
             }
         }
-
-        public async Task<Result<Bid?>> GetBiggestBid(int id, CancellationToken token = default)
+    
+        public async Task<Result> UpdateAsync(int id, LotUpdateModel model, CancellationToken token = default)
         {
-            var l = await _uow.LotRepository.GetByIdAsync(id, token);
-            if (l is null)
+            _logger.LogDebug("UpdateAsync invoked for Lot Id={LotId} with LotUpdateModel: {@Model}", id, model);
+            try
             {
-                return Result<Bid>.Fail($"Lot with id {id} not found");
-            }
-            var bids = l?.Bids;
-
-            int max = 0;
-            int maxId = 0;
-
-            foreach (var b in bids!)
-            {
-                if (b.Amount > max)
+                var existing = await _uow.LotRepository.GetByIdAsync(id, token).ConfigureAwait(false);
+                if (existing is null)
                 {
-                    max = b.Amount;
-                    maxId = b.Id;
+                    _logger.LogWarning("UpdateAsync failed: Lot not found, Id={LotId}", id);
+                    return Result.Fail("Lot not found");
                 }
+
+                existing.StartDate = model.StartDate;
+                existing.EndDate = model.EndDate;
+
+                await _uow.LotRepository.UpdateAsync(existing, token).ConfigureAwait(false);
+                await _uow.Save(token).ConfigureAwait(false);
+
+                _logger.LogInformation("Lot updated successfully: Id={LotId}", id);
+                return Result.Ok("Lot updated");
             }
-            return Result<Bid>.Ok(bids.FirstOrDefault(b => b.Id == maxId));
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating lot Id={LotId}", id);
+                return Result.Fail("An error occurred while updating the lot.");
+            }
         }
+
     }
 }

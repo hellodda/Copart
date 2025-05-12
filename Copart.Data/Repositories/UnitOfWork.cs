@@ -6,20 +6,15 @@ namespace Copart.Data.Repositories
     {
         CopartDbContext _context;
 
-        public UnitOfWork(
-            CopartDbContext context,
-            IVehicleRepository vehicleRepository,
-            ILotRepository lotRepository,
-            IBidRepository bidRepository,
-            IUserRepository userRepository
-        )
+        public UnitOfWork(CopartDbContext context)
         {
             _context = context;
 
-            VehicleRepository = vehicleRepository;
-            LotRepository = lotRepository;
-            BidRepository = bidRepository;
-            UserRepository = userRepository;
+            VehicleRepository = new VehicleRepository(context);
+            LotRepository = new LotRepository(context);
+            BidRepository = new BidRepository(context);
+            UserRepository = new UserRepository(context);
+
         }
 
         public IVehicleRepository VehicleRepository { get; set; }

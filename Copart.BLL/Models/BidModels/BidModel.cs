@@ -1,7 +1,4 @@
-﻿using Copart.BLL.Models.LotModels;
-using Copart.BLL.Models.UserModels;
-
-namespace Copart.BLL.Models.BidModels
+﻿namespace Copart.BLL.Models.BidModels
 {
     public class BidModel
     {

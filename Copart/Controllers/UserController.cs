@@ -6,53 +6,103 @@ using Microsoft.AspNetCore.Mvc;
 namespace Copart.Api.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
-        private readonly IUserService userService;
-        private readonly ILogger<UserController> logger;
+        private readonly IUserService _userService;
+        private readonly ILogger<UserController> _logger;
 
         public UserController(IUserService userService, ILogger<UserController> logger)
         {
-            this.userService = userService;
-            this.logger = logger;
+            _userService = userService;
+            _logger = logger;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll(CancellationToken token)
         {
-            var result = await userService.GetAll(token);
-            if (result.Success) return Ok(result.Data);
-            return BadRequest(result.Message);
+            _logger.LogDebug("GET /api/User called");
+            var result = await _userService.GetAllAsync(token);
+            if (!result.Success)
+            {
+                _logger.LogWarning("GetAll failed: {Message}", result.Message);
+                return BadRequest(result.Message);
+            }
+            return Ok(result.Data);
         }
+
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] UserAddModel user, CancellationToken token)
         {
-            var result = await userService.Add(user, token);
-            if (result.Success) return Ok(result.Message);
-            return BadRequest(result.Message);
-        }
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UserUpdateModel user, CancellationToken token)
-        {
-            var result = await userService.Update(id, user, token);
-            if (result.Success) return Ok(result.Message);
-            return BadRequest(result.Message);
-        }
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete([FromRoute] int id, CancellationToken token)
-        {
-            var result = await userService.Delete(id, token);
-            if (result.Success) return Ok(result.Message);
-            return BadRequest(result.Message);
+            _logger.LogDebug("POST /api/User called with {@User}", user);
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Add ModelState invalid: {@Errors}", ModelState);
+                return BadRequest(ModelState);
+            }
+
+            var result = await _userService.AddAsync(user, token);
+            if (!result.Success)
+            {
+                _logger.LogWarning("Add failed: {Message}", result.Message);
+                return BadRequest(result.Message);
+            }
+
+            return Created(string.Empty, result.Message);
         }
 
-        [HttpPatch("{id}")]
-        public async Task<IActionResult> AddBid([FromRoute] int id, BidAddModel bid, CancellationToken token)
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UserUpdateModel user, CancellationToken token)
         {
-            var result = await userService.AddBid(id, bid, token);
-            if (result.Success) return Ok(result.Message);
-            return BadRequest(result.Message);
+            _logger.LogDebug("PUT /api/User/{Id} called with {@User}", id, user);
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Update ModelState invalid: {@Errors}", ModelState);
+                return BadRequest(ModelState);
+            }
+
+            var result = await _userService.UpdateAsync(id, user, token);
+            if (!result.Success)
+            {
+                _logger.LogWarning("Update failed for Id={Id}: {Message}", id, result.Message);
+                return BadRequest(result.Message);
+            }
+
+            return Ok(result.Message);
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id, CancellationToken token)
+        {
+            _logger.LogDebug("DELETE /api/User/{Id} called", id);
+            var result = await _userService.DeleteAsync(id, token);
+            if (!result.Success)
+            {
+                _logger.LogWarning("Delete failed for Id={Id}: {Message}", id, result.Message);
+                return NotFound(result.Message);
+            }
+
+            return Ok(result.Message);
+        }
+
+        [HttpPatch("{id:int}/bids")]
+        public async Task<IActionResult> AddBid(int id, [FromBody] BidAddModel bid, CancellationToken token)
+        {
+            _logger.LogDebug("PATCH /api/User/{Id}/bids called with {@Bid}", id, bid);
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("AddBid ModelState invalid: {@Errors}", ModelState);
+                return BadRequest(ModelState);
+            }
+
+            var result = await _userService.AddBidAsync(id, bid, token);
+            if (!result.Success)
+            {
+                _logger.LogWarning("AddBid failed for Id={Id}: {Message}", id, result.Message);
+                return BadRequest(result.Message);
+            }
+
+            return Ok(result.Message);
         }
     }
 }

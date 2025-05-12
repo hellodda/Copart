@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Copart.BLL.Services.BidderService
 {
-    public class UserService : IUserService
+    public sealed class UserService : IUserService
     {
         private readonly IUnitOfWork _uow;
         private readonly ILogger<UserService> _logger;
@@ -16,57 +16,143 @@ namespace Copart.BLL.Services.BidderService
 
         public UserService(IUnitOfWork uow, IMapper mapper, ILogger<UserService> logger)
         {
-            _logger = logger;
             _uow = uow;
             _mapper = mapper;
+            _logger = logger;
         }
 
-        public async Task<Result> Add(UserAddModel user, CancellationToken token = default)
+        public async Task<Result> AddAsync(UserAddModel model, CancellationToken token = default)
         {
-            await _uow.UserRepository.AddAsync(_mapper.Map<User>(user), token);
-            await _uow.Save(token);
-            return Result.Ok();
+            _logger.LogDebug("AddAsync invoked with UserAddModel: {@Model}", model);
+            try
+            {
+                var entity = _mapper.Map<User>(model);
+                await _uow.UserRepository.AddAsync(entity, token).ConfigureAwait(false);
+                await _uow.Save(token).ConfigureAwait(false);
+                _logger.LogInformation("User added successfully: Id={UserId}", entity.Id);
+                return Result.Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding user: {@Model}", model);
+                return Result.Fail("An error occurred while adding the user.");
+            }
         }
 
-        public async Task<Result> AddBid(int id, BidAddModel bid, CancellationToken token = default)
+        public async Task<Result> AddBidAsync(int userId, BidAddModel bidModel, CancellationToken token = default)
         {
-            var u = await _uow.UserRepository.GetByIdAsync(id, token);
-            if (u is null) return Result.Fail($"User with id {id} not found");
-            await _uow.UserRepository.AddBid(u, _mapper.Map<Bid>(bid));
-            await _uow.Save(token);
-            return Result.Ok("Bid added to user");
+            _logger.LogDebug("AddBidAsync invoked for UserId={UserId} with BidAddModel: {@BidModel}", userId, bidModel);
+            try
+            {
+                var user = await _uow.UserRepository.GetByIdAsync(userId, token).ConfigureAwait(false);
+                if (user is null)
+                {
+                    _logger.LogWarning("AddBidAsync failed: User not found, Id={UserId}", userId);
+                    return Result.Fail("User not found");
+                }
+
+                var bid = _mapper.Map<Bid>(bidModel);
+                await _uow.UserRepository.AddBidAsync(user, bid, token).ConfigureAwait(false);
+                await _uow.Save(token).ConfigureAwait(false);
+                _logger.LogInformation("Bid added to user: UserId={UserId}, BidId={BidId}", userId, bid.Id);
+                return Result.Ok("Bid added to user");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding bid to user Id={UserId}", userId);
+                return Result.Fail("An error occurred while adding the bid.");
+            }
         }
 
-        public async Task<Result> Delete(int id, CancellationToken token = default)
+        public async Task<Result> DeleteAsync(int userId, CancellationToken token = default)
         {
-            var u = await _uow.UserRepository.GetByIdAsync(id, token);
-            if (u is null) return Result.Fail($"User with id {id} not found");
-            await _uow.UserRepository.DeleteAsync(u);
-            await _uow.Save(token);
-            return Result.Ok("Deleted");
+            _logger.LogDebug("DeleteAsync invoked for UserId={UserId}", userId);
+            try
+            {
+                var user = await _uow.UserRepository.GetByIdAsync(userId, token).ConfigureAwait(false);
+                if (user is null)
+                {
+                    _logger.LogWarning("DeleteAsync failed: User not found, Id={UserId}", userId);
+                    return Result.Fail("User not found");
+                }
+
+                await _uow.UserRepository.DeleteAsync(user, token).ConfigureAwait(false);
+                await _uow.Save(token).ConfigureAwait(false);
+                _logger.LogInformation("User deleted successfully: Id={UserId}", userId);
+                return Result.Ok("User deleted");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting user Id={UserId}", userId);
+                return Result.Fail("An error occurred while deleting the user.");
+            }
         }
 
-        public async Task<Result<IEnumerable<UserModel>>> GetAll(CancellationToken token = default)
+        public async Task<Result<IEnumerable<UserModel?>?>> GetAllAsync(CancellationToken token = default)
         {
-            return Result<IEnumerable<UserModel>>.Ok((await _uow.UserRepository.GetAllAsync(token)).Select(u => _mapper.Map<UserModel>(u)));
+            _logger.LogDebug("GetAllAsync invoked");
+            try
+            {
+                var users = await _uow.UserRepository.GetAllAsync(token).ConfigureAwait(false);
+                var models = users?.Select(u => _mapper.Map<UserModel>(u));
+                _logger.LogInformation("Retrieved {Count} users", models?.Count());
+                return Result<IEnumerable<UserModel>>.Ok(models)!;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving users");
+                return Result<IEnumerable<UserModel>>.Fail("An error occurred while retrieving users.")!;
+            }
         }
 
-        public async Task<Result<UserModel>> GetById(int id, CancellationToken token = default)
+        public async Task<Result<UserModel?>> GetByIdAsync(int userId, CancellationToken token = default)
         {
-            var u = await _uow.UserRepository.GetByIdAsync(id, token);
-            if (u is null) return Result<UserModel>.Fail($"User with id {id} not found");
-            return Result<UserModel>.Ok(_mapper.Map<UserModel>(u));
+            _logger.LogDebug("GetByIdAsync invoked for UserId={UserId}", userId);
+            try
+            {
+                var user = await _uow.UserRepository.GetByIdAsync(userId, token).ConfigureAwait(false);
+                if (user is null)
+                {
+                    _logger.LogWarning("GetByIdAsync failed: User not found, Id={UserId}", userId);
+                    return Result<UserModel>.Fail("User not found")!;
+                }
+
+                var model = _mapper.Map<UserModel>(user);
+                _logger.LogInformation("User retrieved successfully: Id={UserId}", userId);
+                return Result<UserModel>.Ok(model)!;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving user Id={UserId}", userId);
+                return Result<UserModel>.Fail("An error occurred while retrieving the user.")!;
+            }
         }
 
-        public async Task<Result> Update(int id, UserUpdateModel user, CancellationToken token = default)
+        public async Task<Result> UpdateAsync(int userId, UserUpdateModel model, CancellationToken token = default)
         {
-            var u = await _uow.UserRepository.GetByIdAsync(id, token);
-            if (u is null) return Result.Fail($"User with id {id} not found");
-            u.Name = user.Name ?? u.Name;
-            u.Email = user.Email ?? u.Email;
-            await _uow.UserRepository.UpdateAsync(u, token);
-            await _uow.Save(token);
-            return Result.Ok("Updated");
+            _logger.LogDebug("UpdateAsync invoked for UserId={UserId} with UserUpdateModel: {@Model}", userId, model);
+            try
+            {
+                var existing = await _uow.UserRepository.GetByIdAsync(userId, token).ConfigureAwait(false);
+                if (existing is null)
+                {
+                    _logger.LogWarning("UpdateAsync failed: User not found, Id={UserId}", userId);
+                    return Result.Fail("User not found");
+                }
+
+                existing.Name = model.Name ?? existing.Name;
+                existing.Email = model.Email ?? existing.Email;
+
+                await _uow.UserRepository.UpdateAsync(existing, token).ConfigureAwait(false);
+                await _uow.Save(token).ConfigureAwait(false);
+                _logger.LogInformation("User updated successfully: Id={UserId}", userId);
+                return Result.Ok("User updated");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating user Id={UserId}", userId);
+                return Result.Fail("An error occurred while updating the user.");
+            }
         }
     }
 }

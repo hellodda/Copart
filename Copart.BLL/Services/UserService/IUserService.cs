@@ -6,11 +6,11 @@ namespace Copart.BLL.Services.BidderService
 {
     public interface IUserService
     {
-        public Task<Result> Add(UserAddModel user, CancellationToken token = default);
-        public Task<Result> Delete(int id, CancellationToken token = default);
-        public Task<Result<IEnumerable<UserModel>>> GetAll(CancellationToken token = default);
-        public Task<Result<UserModel>> GetById(int id, CancellationToken token = default);
-        public Task<Result> Update(int id, UserUpdateModel user, CancellationToken token = default);
-        public Task<Result> AddBid(int id, BidAddModel bid, CancellationToken token = default);
+        public Task<Result<IEnumerable<UserModel?>?>> GetAllAsync(CancellationToken token = default);
+        public Task<Result<UserModel?>> GetByIdAsync(int id, CancellationToken token = default);
+        public Task<Result> AddAsync(UserAddModel model, CancellationToken token = default);
+        public Task<Result> AddBidAsync(int id, BidAddModel model, CancellationToken token = default);
+        public Task<Result> UpdateAsync(int id, UserUpdateModel model, CancellationToken token = default);
+        public Task<Result> DeleteAsync(int id, CancellationToken token = default);
     }
 }

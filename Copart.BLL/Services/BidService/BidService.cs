@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Copart.BLL.Services.BidService
 {
-    public class BidService : IBidService
+    public sealed class BidService : IBidService
     {
         private readonly IUnitOfWork _uow;
         private readonly ILogger<BidService> _logger;
@@ -15,47 +15,116 @@ namespace Copart.BLL.Services.BidService
 
         public BidService(IUnitOfWork uow, IMapper mapper, ILogger<BidService> logger)
         {
-            _logger = logger;
             _uow = uow;
             _mapper = mapper;
+            _logger = logger;
         }
 
-        public async Task<Result> Add(BidAddModel bid, CancellationToken token = default)
+        public async Task<Result> AddAsync(BidAddModel model, CancellationToken token = default)
         {
-            await _uow.BidRepository.AddAsync(_mapper.Map<Bid>(bid), token);
-            await _uow.Save(token);
-            return Result.Ok();
+            _logger.LogDebug("Add invoked with BidAddModel: {@BidModel}", model);
+            try
+            {
+                var bidEntity = _mapper.Map<Bid>(model);
+                await _uow.BidRepository.AddAsync(bidEntity, token).ConfigureAwait(false);
+                await _uow.Save(token).ConfigureAwait(false);
+                _logger.LogInformation("Bid added successfully: Id={BidId}", bidEntity.Id);
+                return Result.Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding bid: {@BidModel}", model);
+                return Result.Fail("An error occurred while adding the bid.");
+            }
         }
 
-        public async Task<Result> Delete(int id, CancellationToken token = default)
+        public async Task<Result> DeleteAsync(int id, CancellationToken token = default)
         {
-            var b = await _uow.BidRepository.GetByIdAsync(id, token);
-            if (b is null) return Result.Fail($"Bid with id {id} not found");
-            await _uow.BidRepository.DeleteAsync(b);
-            await _uow.Save(token);
-            return Result.Ok("Deleted");
+            _logger.LogDebug("Delete invoked for Bid Id={BidId}", id);
+            try
+            {
+                var bid = await _uow.BidRepository.GetByIdAsync(id, token).ConfigureAwait(false);
+                if (bid is null)
+                {
+                    _logger.LogWarning("Delete failed: Bid not found, Id={BidId}", id);
+                    return Result.Fail($"Bid with id {id} not found");
+                }
+
+                await _uow.BidRepository.DeleteAsync(bid, token).ConfigureAwait(false);
+                await _uow.Save(token).ConfigureAwait(false);
+                _logger.LogInformation("Bid deleted successfully: Id={BidId}", id);
+                return Result.Ok("Deleted");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting bid Id={BidId}", id);
+                return Result.Fail("An error occurred while deleting the bid.");
+            }
         }
 
-        public async Task<Result<IEnumerable<BidModel>>> GetAll(CancellationToken token = default)
+        public async Task<Result<IEnumerable<BidModel?>?>> GetAllAsync(CancellationToken token = default)
         {
-            return Result<IEnumerable<BidModel>>.Ok((await _uow.BidRepository.GetAllAsync(token)).Select(b => _mapper.Map<BidModel>(b)));
+            _logger.LogDebug("GetAll invoked");
+            try
+            {
+                var bids = await _uow.BidRepository.GetAllAsync(token).ConfigureAwait(false);
+                var models = bids?.Select(b => _mapper.Map<BidModel>(b));
+                _logger.LogInformation("Retrieved {Count} bids", models?.Count());
+                return Result<IEnumerable<BidModel>>.Ok(models)!;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving all bids");
+                return Result<IEnumerable<BidModel>>.Fail("An error occurred while retrieving bids.")!;
+            }
         }
 
-        public async Task<Result<BidModel>> GetById(int id, CancellationToken token = default)
+        public async Task<Result<BidModel?>> GetByIdAsync(int id, CancellationToken token = default)
         {
-            var b = await _uow.BidRepository.GetByIdAsync(id, token);
-            if (b is null) return Result<BidModel>.Fail($"Bid with id {id} not found");
-            return Result<BidModel>.Ok(_mapper.Map<BidModel>(b));
+            _logger.LogDebug("GetById invoked for Bid Id={BidId}", id);
+            try
+            {
+                var bid = await _uow.BidRepository.GetByIdAsync(id, token).ConfigureAwait(false);
+                if (bid is null)
+                {
+                    _logger.LogWarning("GetById failed: Bid not found, Id={BidId}", id);
+                    return Result<BidModel>.Fail($"Bid with id {id} not found")!;
+                }
+
+                var model = _mapper.Map<BidModel>(bid);
+                _logger.LogInformation("Bid retrieved successfully: Id={BidId}", id);
+                return Result<BidModel>.Ok(model)!;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving bid Id={BidId}", id);
+                return Result<BidModel>.Fail("An error occurred while retrieving the bid.")!;
+            }
         }
 
-        public async Task<Result> Update(int id, BidUpdateModel bid, CancellationToken token = default)
+        public async Task<Result> UpdateAsync(int id, BidUpdateModel model, CancellationToken token = default)
         {
-            var b = await _uow.BidRepository.GetByIdAsync(id, token);
-            if (b is null) return Result.Fail($"Bid with id {id} not found");
-            b.Amount = bid.Amount;
-            await _uow.BidRepository.UpdateAsync(b, token);
-            await _uow.Save(token);
-            return Result.Ok("Updated");
+            _logger.LogDebug("Update invoked for Bid Id={BidId} with BidUpdateModel: {@BidModel}", id, model);
+            try
+            {
+                var bid = await _uow.BidRepository.GetByIdAsync(id, token).ConfigureAwait(false);
+                if (bid is null)
+                {
+                    _logger.LogWarning("Update failed: Bid not found, Id={BidId}", id);
+                    return Result.Fail($"Bid with id {id} not found");
+                }
+
+                bid.Amount = model.Amount;
+                await _uow.BidRepository.UpdateAsync(bid, token).ConfigureAwait(false);
+                await _uow.Save(token).ConfigureAwait(false);
+                _logger.LogInformation("Bid updated successfully: Id={BidId}", id);
+                return Result.Ok("Updated");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating bid Id={BidId}", id);
+                return Result.Fail("An error occurred while updating the bid.");
+            }
         }
     }
 }

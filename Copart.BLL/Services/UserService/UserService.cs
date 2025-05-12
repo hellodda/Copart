@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Copart.BLL.Models.BidModels;
 using Copart.BLL.Models.UserModels;
 using Copart.BLL.Results;
 using Copart.Domain.BaseRepositories;
@@ -25,6 +26,15 @@ namespace Copart.BLL.Services.BidderService
             await _uow.UserRepository.AddAsync(_mapper.Map<User>(user), token);
             await _uow.Save(token);
             return Result.Ok();
+        }
+
+        public async Task<Result> AddBid(int id, BidAddModel bid, CancellationToken token = default)
+        {
+            var u = await _uow.UserRepository.GetByIdAsync(id, token);
+            if (u is null) return Result.Fail($"User with id {id} not found");
+            await _uow.UserRepository.AddBid(u, _mapper.Map<Bid>(bid));
+            await _uow.Save(token);
+            return Result.Ok("Bid added to user");
         }
 
         public async Task<Result> Delete(int id, CancellationToken token = default)

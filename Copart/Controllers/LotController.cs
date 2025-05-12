@@ -64,5 +64,14 @@ namespace Copart.Api.Controllers
             if (!result.Success) return BadRequest(result.Message);
             return Ok(result.Message);
         }
+
+        [HttpGet("/biggest")]
+        public async Task<IActionResult> GetBiggesBid([FromRoute] int id, CancellationToken token)
+        {
+            var result = await _service.GetBiggestBid(id, token);
+            if (!result.Success) return BadRequest(result.Message);
+            return Ok(result.Data);
+        }
+
     }
 }

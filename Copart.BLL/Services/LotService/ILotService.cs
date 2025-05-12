@@ -1,5 +1,6 @@
 ﻿using Copart.BLL.Models.LotModels;
 using Copart.BLL.Results;
+using Copart.Domain.Entities;
 
 namespace Copart.BLL.Services.LotService
 {
@@ -11,5 +12,6 @@ namespace Copart.BLL.Services.LotService
         public Task<Result> Update(int id, LotUpdateModel lot, CancellationToken token = default);
         public Task<Result> Add(LotAddModel lot, CancellationToken token = default);
         public Task<Result> Delete(int id, CancellationToken token = default);
+        public Task<Result<Bid?>> GetBiggestBid(int id, CancellationToken token = default);
     }
 }

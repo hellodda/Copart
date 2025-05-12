@@ -53,7 +53,7 @@ namespace Copart.Data.Repositories
             _logger.LogDebug("GetAllAsync invoked");
             try
             {
-                var list = await _context.Lots.Include(e => e.Vehicle).ToListAsync(token);
+                var list = await _context.Lots.Include(l => l.Bids).Include(e => e.Vehicle).ToListAsync(token);
                 _logger.LogInformation("GetAllAsync retrieved {Count} lots", list.Count);
                 return list;
             }
@@ -64,12 +64,14 @@ namespace Copart.Data.Repositories
             }
         }
 
+     
+
         public async Task<Lot?> GetByIdAsync(int id, CancellationToken token = default)
         {
             _logger.LogDebug("GetByIdAsync invoked for Id {Id}", id);
             try
             {
-                var lot = await _context.Lots.FirstOrDefaultAsync(l => l.Id == id, token);
+                var lot = await _context.Lots.Include(l => l.Vehicle).FirstOrDefaultAsync(l => l.Id == id, token);
                 if (lot is null)
                     _logger.LogWarning("GetByIdAsync: Lot Id {Id} not found", id);
                 else

@@ -1,4 +1,5 @@
-﻿using Copart.BLL.Models.UserModels;
+﻿using Copart.BLL.Models.BidModels;
+using Copart.BLL.Models.UserModels;
 using Copart.BLL.Services.BidderService;
 using Microsoft.AspNetCore.Mvc;
 
@@ -42,6 +43,14 @@ namespace Copart.Api.Controllers
         public async Task<IActionResult> Delete([FromRoute] int id, CancellationToken token)
         {
             var result = await userService.Delete(id, token);
+            if (result.Success) return Ok(result.Message);
+            return BadRequest(result.Message);
+        }
+
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> AddBid([FromRoute] int id, BidAddModel bid, CancellationToken token)
+        {
+            var result = await userService.AddBid(id, bid, token);
             if (result.Success) return Ok(result.Message);
             return BadRequest(result.Message);
         }

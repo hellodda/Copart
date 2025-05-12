@@ -3,6 +3,7 @@ using Copart.BLL.Models.LotModels;
 using Copart.BLL.Results;
 using Copart.Domain.BaseRepositories;
 using Copart.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Text;
 
@@ -152,6 +153,29 @@ namespace Copart.BLL.Services.LotService
                 _logger.LogError(ex, "Error updating lot with Id {Id}: {@Lot}", id, lot);
                 return Result.Fail("Error updating lot");
             }
+        }
+
+        public async Task<Result<Bid?>> GetBiggestBid(int id, CancellationToken token = default)
+        {
+            var l = await _uow.LotRepository.GetByIdAsync(id, token);
+            if (l is null)
+            {
+                return Result<Bid>.Fail($"Lot with id {id} not found");
+            }
+            var bids = l?.Bids;
+
+            int max = 0;
+            int maxId = 0;
+
+            foreach (var b in bids!)
+            {
+                if (b.Amount > max)
+                {
+                    max = b.Amount;
+                    maxId = b.Id;
+                }
+            }
+            return Result<Bid>.Ok(bids.FirstOrDefault(b => b.Id == maxId));
         }
     }
 }

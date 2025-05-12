@@ -9,11 +9,7 @@ namespace Copart.BLL.Models.BidModels
 
         public int LotId { get; set; }
 
-        public LotModel Lot { get; set; } = default!;
-
         public int UserId { get; set; }
-
-        public UserModel User { get; set; } = default!;
 
         public int Amount { get; set; }
     }

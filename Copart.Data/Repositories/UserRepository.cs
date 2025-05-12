@@ -31,6 +31,13 @@ namespace Copart.Data.Repositories
             }
         }
 
+        public Task AddBid(User user, Bid bid, CancellationToken token = default)
+        {
+            user.Bids.Add(bid);
+            _context.Update(user);
+            return Task.CompletedTask;
+        }
+
         public Task DeleteAsync(User user, CancellationToken token = default)
         {
             _logger.LogInformation("Removing bidder: Id={BidderId}", user.Id);

@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using Copart.BLL.Profiles;
 using Copart.BLL.Services.BidService;
 using Copart.BLL.Services.BidderService;
+using FluentValidation;
+using Copart.BLL.Validators;
 
 namespace Copart.Api.Extensions
 {
@@ -20,6 +22,7 @@ namespace Copart.Api.Extensions
             builder.Services.AddScoped<IBidService, BidService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddSignalR();
+            builder.Services.AddValidatorsFromAssemblyContaining<BidValidator>(ServiceLifetime.Transient);
             builder.Services.AddAutoMapper(typeof(LotProfile));
             builder.Services.AddDbContext<CopartDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("Sql")));

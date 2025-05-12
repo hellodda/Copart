@@ -3,6 +3,7 @@ using Copart.BLL.Models.VehicleModels;
 using Copart.BLL.Results;
 using Copart.Domain.BaseRepositories;
 using Copart.Domain.Entities;
+using FluentValidation;
 using Microsoft.Extensions.Logging;
 
 namespace Copart.BLL.Services.VehicleService
@@ -20,14 +21,18 @@ namespace Copart.BLL.Services.VehicleService
             _mapper = mapper;
         }
 
-        public async Task<Result> AddAsync(VehicleAddModel model, CancellationToken token = default)
+        public async Task<Result> AddAsync(VehicleAddModel model, IValidator<VehicleAddModel> validator, CancellationToken token = default)
         {
             _logger.LogDebug("AddAsync invoked with VehicleAddModel: {@Model}", model);
             try
             {
+                validator.ValidateAndThrow(model);
+
                 var entity = _mapper.Map<Vehicle>(model);
+
                 await _uow.VehicleRepository.AddAsync(entity, token).ConfigureAwait(false);
                 await _uow.Save(token).ConfigureAwait(false);
+
                 _logger.LogInformation("Vehicle added successfully: Id={VehicleId}", entity.Id);
                 return Result.Ok();
             }
@@ -52,6 +57,7 @@ namespace Copart.BLL.Services.VehicleService
 
                 await _uow.VehicleRepository.DeleteAsync(entity).ConfigureAwait(false);
                 await _uow.Save(token).ConfigureAwait(false);
+
                 _logger.LogInformation("Vehicle deleted successfully: Id={VehicleId}", id);
                 return Result.Ok("Vehicle deleted");
             }
@@ -69,6 +75,7 @@ namespace Copart.BLL.Services.VehicleService
             {
                 var entities = await _uow.VehicleRepository.GetAllAsync(token).ConfigureAwait(false);
                 var models = entities?.Select(v => _mapper.Map<VehicleModel>(v));
+
                 _logger.LogInformation("Retrieved {Count} vehicles", models?.Count());
                 return Result<IEnumerable<VehicleModel>>.Ok(models);
             }
@@ -109,6 +116,7 @@ namespace Copart.BLL.Services.VehicleService
             {
                 var entities = await _uow.VehicleRepository.GetByMakeAsync(make, token).ConfigureAwait(false);
                 var models = entities?.Select(v => _mapper.Map<VehicleModel>(v));
+
                 _logger.LogInformation("Retrieved {Count} vehicles for make '{Make}'", models?.Count(), make);
                 return Result<IEnumerable<VehicleModel>>.Ok(models);
             }
@@ -126,6 +134,7 @@ namespace Copart.BLL.Services.VehicleService
             {
                 var entities = await _uow.VehicleRepository.GetByModelAsync(modelName, token).ConfigureAwait(false);
                 var models = entities?.Select(v => _mapper.Map<VehicleModel>(v));
+
                 _logger.LogInformation("Retrieved {Count} vehicles for model '{Model}'", models?.Count(), modelName);
                 return Result<IEnumerable<VehicleModel>>.Ok(models);
             }
@@ -151,6 +160,7 @@ namespace Copart.BLL.Services.VehicleService
                 _mapper.Map(model, existing);
                 await _uow.VehicleRepository.UpdateAsync(existing).ConfigureAwait(false);
                 await _uow.Save(token).ConfigureAwait(false);
+
                 _logger.LogInformation("Vehicle updated successfully: Id={VehicleId}", id);
                 return Result.Ok("Vehicle updated");
             }

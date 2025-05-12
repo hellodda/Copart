@@ -4,6 +4,7 @@ using Copart.BLL.Models.UserModels;
 using Copart.BLL.Results;
 using Copart.Domain.BaseRepositories;
 using Copart.Domain.Entities;
+using FluentValidation;
 using Microsoft.Extensions.Logging;
 
 namespace Copart.BLL.Services.BidderService
@@ -21,14 +22,18 @@ namespace Copart.BLL.Services.BidderService
             _logger = logger;
         }
 
-        public async Task<Result> AddAsync(UserAddModel model, CancellationToken token = default)
+        public async Task<Result> AddAsync(UserAddModel model, IValidator<UserAddModel> validator, CancellationToken token = default)
         {
             _logger.LogDebug("AddAsync invoked with UserAddModel: {@Model}", model);
             try
             {
+                validator.ValidateAndThrow(model);
+
                 var entity = _mapper.Map<User>(model);
+
                 await _uow.UserRepository.AddAsync(entity, token).ConfigureAwait(false);
                 await _uow.Save(token).ConfigureAwait(false);
+
                 _logger.LogInformation("User added successfully: Id={UserId}", entity.Id);
                 return Result.Ok();
             }
@@ -52,8 +57,10 @@ namespace Copart.BLL.Services.BidderService
                 }
 
                 var bid = _mapper.Map<Bid>(bidModel);
+
                 await _uow.UserRepository.AddBidAsync(user, bid, token).ConfigureAwait(false);
                 await _uow.Save(token).ConfigureAwait(false);
+
                 _logger.LogInformation("Bid added to user: UserId={UserId}, BidId={BidId}", userId, bid.Id);
                 return Result.Ok("Bid added to user");
             }
@@ -78,6 +85,7 @@ namespace Copart.BLL.Services.BidderService
 
                 await _uow.UserRepository.DeleteAsync(user, token).ConfigureAwait(false);
                 await _uow.Save(token).ConfigureAwait(false);
+
                 _logger.LogInformation("User deleted successfully: Id={UserId}", userId);
                 return Result.Ok("User deleted");
             }
@@ -95,6 +103,7 @@ namespace Copart.BLL.Services.BidderService
             {
                 var users = await _uow.UserRepository.GetAllAsync(token).ConfigureAwait(false);
                 var models = users?.Select(u => _mapper.Map<UserModel>(u));
+
                 _logger.LogInformation("Retrieved {Count} users", models?.Count());
                 return Result<IEnumerable<UserModel>>.Ok(models)!;
             }
@@ -145,6 +154,7 @@ namespace Copart.BLL.Services.BidderService
 
                 await _uow.UserRepository.UpdateAsync(existing, token).ConfigureAwait(false);
                 await _uow.Save(token).ConfigureAwait(false);
+
                 _logger.LogInformation("User updated successfully: Id={UserId}", userId);
                 return Result.Ok("User updated");
             }

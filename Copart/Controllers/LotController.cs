@@ -1,6 +1,7 @@
 ﻿using Copart.BLL.Models.BidModels;
 using Copart.BLL.Models.LotModels;
 using Copart.BLL.Services.LotService;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Copart.Api.Controllers
@@ -58,7 +59,7 @@ namespace Copart.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] LotAddModel model, CancellationToken token)
+        public async Task<IActionResult> Add([FromBody] LotAddModel model, [FromServices] IValidator<LotAddModel> validator, CancellationToken token)
         {
             _logger.LogDebug("POST /api/Lot called with {@Model}", model);
             if (!ModelState.IsValid)
@@ -67,7 +68,7 @@ namespace Copart.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var result = await _service.AddAsync(model, token);
+            var result = await _service.AddAsync(model, validator, token);
             if (!result.Success)
             {
                 _logger.LogWarning("Add failed: {Message}", result.Message);

@@ -3,6 +3,7 @@ using Copart.BLL.Models.BidModels;
 using Copart.BLL.Results;
 using Copart.Domain.BaseRepositories;
 using Copart.Domain.Entities;
+using FluentValidation;
 using Microsoft.Extensions.Logging;
 
 namespace Copart.BLL.Services.BidService
@@ -20,14 +21,18 @@ namespace Copart.BLL.Services.BidService
             _logger = logger;
         }
 
-        public async Task<Result> AddAsync(BidAddModel model, CancellationToken token = default)
+        public async Task<Result> AddAsync(BidAddModel model, IValidator<BidAddModel> validator, CancellationToken token = default)
         {
             _logger.LogDebug("Add invoked with BidAddModel: {@BidModel}", model);
             try
             {
+                validator.ValidateAndThrow(model);
+
                 var bidEntity = _mapper.Map<Bid>(model);
+
                 await _uow.BidRepository.AddAsync(bidEntity, token).ConfigureAwait(false);
                 await _uow.Save(token).ConfigureAwait(false);
+
                 _logger.LogInformation("Bid added successfully: Id={BidId}", bidEntity.Id);
                 return Result.Ok();
             }
@@ -52,6 +57,7 @@ namespace Copart.BLL.Services.BidService
 
                 await _uow.BidRepository.DeleteAsync(bid, token).ConfigureAwait(false);
                 await _uow.Save(token).ConfigureAwait(false);
+
                 _logger.LogInformation("Bid deleted successfully: Id={BidId}", id);
                 return Result.Ok("Deleted");
             }
@@ -69,6 +75,7 @@ namespace Copart.BLL.Services.BidService
             {
                 var bids = await _uow.BidRepository.GetAllAsync(token).ConfigureAwait(false);
                 var models = bids?.Select(b => _mapper.Map<BidModel>(b));
+
                 _logger.LogInformation("Retrieved {Count} bids", models?.Count());
                 return Result<IEnumerable<BidModel>>.Ok(models)!;
             }

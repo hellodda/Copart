@@ -4,6 +4,7 @@ using Copart.BLL.Models.LotModels;
 using Copart.BLL.Results;
 using Copart.Domain.BaseRepositories;
 using Copart.Domain.Entities;
+using FluentValidation;
 using Microsoft.Extensions.Logging;
 using System.Text;
 
@@ -22,11 +23,13 @@ namespace Copart.BLL.Services.LotService
             _logger = logger;
         }
 
-        public async Task<Result> AddAsync(LotAddModel model, CancellationToken token = default)
+        public async Task<Result> AddAsync(LotAddModel model, IValidator<LotAddModel> validator, CancellationToken token = default)
         {
             _logger.LogDebug("Add invoked with LotAddModel: {@Model}", model);
             try
             {
+                validator.ValidateAndThrow(model);
+
                 var entity = _mapper.Map<Lot>(model);
                 entity.LotNumber = Convert.ToBase64String(Encoding.UTF8.GetBytes(entity.Vehicle.Vin));
 

@@ -1,5 +1,6 @@
 ﻿using Copart.BLL.Models.BidModels;
 using Copart.BLL.Services.BidService;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Copart.Api.Controllers
@@ -44,7 +45,7 @@ namespace Copart.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] BidAddModel model, CancellationToken token)
+        public async Task<IActionResult> Add([FromBody] BidAddModel model, [FromServices] IValidator<BidAddModel> validator, CancellationToken token)
         {
             _logger.LogDebug("POST /api/Bid called with {@Model}", model);
             if (!ModelState.IsValid)
@@ -53,7 +54,7 @@ namespace Copart.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var result = await _bidService.AddAsync(model, token);
+            var result = await _bidService.AddAsync(model, validator, token);
             if (!result.Success)
             {
                 _logger.LogWarning("Add failed: {Message}", result.Message);

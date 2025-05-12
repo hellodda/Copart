@@ -10,12 +10,10 @@
 
         public Vehicle Vehicle { get; set; } = default!;
 
-        public decimal MinimalBid { get; set; }
-
-        public decimal CurrentBid { get; set; }
-
         public DateTime StartDate { get; set; }
 
         public DateTime EndDate { get; set; }
+
+        public ICollection<Bid> Bids { get; set; } = new List<Bid>();
     }
 }

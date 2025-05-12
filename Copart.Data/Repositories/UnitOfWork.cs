@@ -9,17 +9,23 @@ namespace Copart.Data.Repositories
         public UnitOfWork(
             CopartDbContext context,
             IVehicleRepository vehicleRepository,
-            ILotRepository lotRepository
+            ILotRepository lotRepository,
+            IBidRepository bidRepository,
+            IUserRepository userRepository
         )
         {
             _context = context;
 
             VehicleRepository = vehicleRepository;
             LotRepository = lotRepository;
+            BidRepository = bidRepository;
+            UserRepository = userRepository;
         }
 
         public IVehicleRepository VehicleRepository { get; set; }
         public ILotRepository LotRepository { get; set; }
+        public IBidRepository BidRepository { get; set; }
+        public IUserRepository UserRepository { get; set; }
 
         public void Dispose()
         {

@@ -40,16 +40,24 @@ namespace Copart.Data
     {
         public void Configure(EntityTypeBuilder<Lot> builder)
         {
-            builder.HasKey(l => l.Id);
-            builder.Property(l => l.LotNumber).IsRequired();
-            builder.HasOne(l => l.Vehicle);
-           
-            builder.Property(p => p.CurrentBid)
-            .HasPrecision(18, 2); 
+            builder.HasKey(lot => lot.Id);
+            builder.Property(lot => lot.LotNumber).IsRequired();
+            builder.HasOne(lot => lot.Vehicle);
 
-            builder.Property(p => p.MinimalBid)
-            .HasPrecision(18, 2);
+            builder.HasMany(lot => lot.Bids)
+                .WithOne(bid => bid.Lot)
+                .HasForeignKey(bid => bid.LotId);
         }
     }
 
+    internal class BidConfiguration : IEntityTypeConfiguration<Bid>
+    {
+        public void Configure(EntityTypeBuilder<Bid> builder)
+        {
+            builder.HasKey(bid => bid.Id);
+            builder.Property(bid => bid.UserId).IsRequired();
+            builder.HasOne(bid => bid.User);
+            builder.HasOne(bid => bid.Lot);
+        }
+    }
 }

@@ -53,7 +53,7 @@ namespace Copart.Data.Repositories
             _logger.LogInformation("Retrieving all bidders from database");
             try
             {
-                var list = await _context.Users.ToListAsync(token);
+                var list = await _context.Users.Include(u => u.Bids).ToListAsync(token);
                 _logger.LogInformation("Found {Count} bidders", list.Count);
                 return list;
             }

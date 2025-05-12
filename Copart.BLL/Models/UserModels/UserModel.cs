@@ -1,6 +1,8 @@
-﻿namespace Copart.Domain.Entities
+﻿using Copart.BLL.Models.BidModels;
+
+namespace Copart.BLL.Models.UserModels
 {
-    public class User
+    public class UserModel
     {
         public int Id { get; set; }
 
@@ -8,6 +10,5 @@
 
         public string Email { get; set; } = string.Empty;
 
-        public ICollection<Bid> Bids { get; set; } = new List<Bid>();
     }
 }

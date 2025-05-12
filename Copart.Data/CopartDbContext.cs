@@ -60,4 +60,14 @@ namespace Copart.Data
             builder.HasOne(bid => bid.Lot);
         }
     }
+
+    internal class UserConfiguration : IEntityTypeConfiguration<User>
+    {
+        public void Configure(EntityTypeBuilder<User> builder)
+        {
+            builder.HasKey(usr => usr.Id);
+            builder.Property(usr => usr.Name).IsRequired();
+            builder.HasMany(usr => usr.Bids);
+        }
+    }
 }

@@ -29,7 +29,7 @@ namespace Copart.Data.Repositories
 
         public async Task<IEnumerable<Bid>> GetAllAsync(CancellationToken token = default)
         {
-            return await _context.Bids.ToListAsync(token);
+            return await _context.Bids.Include(b => b.User).Include(b => b.Lot).ThenInclude(l => l.Vehicle).ToListAsync(token);
         }
 
         public async Task<Bid> GetByIdAsync(int id, CancellationToken token = default)

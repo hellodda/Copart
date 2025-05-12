@@ -22,6 +22,32 @@ namespace Copart.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Copart.Domain.Entities.Bid", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LotId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LotId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Bids");
+                });
+
             modelBuilder.Entity("Copart.Domain.Entities.Lot", b =>
                 {
                     b.Property<int>("Id")
@@ -30,20 +56,12 @@ namespace Copart.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<decimal>("CurrentBid")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("LotNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("MinimalBid")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
@@ -113,6 +131,25 @@ namespace Copart.Data.Migrations
                     b.ToTable("Vehicles");
                 });
 
+            modelBuilder.Entity("Copart.Domain.Entities.Bid", b =>
+                {
+                    b.HasOne("Copart.Domain.Entities.Lot", "Lot")
+                        .WithMany("Bids")
+                        .HasForeignKey("LotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Copart.Domain.Entities.User", "User")
+                        .WithMany("Bids")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lot");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Copart.Domain.Entities.Lot", b =>
                 {
                     b.HasOne("Copart.Domain.Entities.Vehicle", "Vehicle")
@@ -122,6 +159,16 @@ namespace Copart.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Vehicle");
+                });
+
+            modelBuilder.Entity("Copart.Domain.Entities.Lot", b =>
+                {
+                    b.Navigation("Bids");
+                });
+
+            modelBuilder.Entity("Copart.Domain.Entities.User", b =>
+                {
+                    b.Navigation("Bids");
                 });
 #pragma warning restore 612, 618
         }

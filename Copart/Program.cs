@@ -1,6 +1,5 @@
 using Copart.Api.Extensions;
 using Copart.Api.Middlewares;
-using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,7 +23,7 @@ if (app.Environment.IsDevelopment())
 
 app.Configure();
 
-app.UseMiddleware<ExceptionHandlingMiddleware>();
+//app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 

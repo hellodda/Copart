@@ -1,0 +1,117 @@
+﻿@page "/lotdetail/{lotNum}"
+@using Copart.BLL.Models.LotModels
+@inject ILotApi LotService
+
+@if (isLoading)
+{
+    <MudProgressCircular Color="Color.Info" Indeterminate="true" />
+}
+else
+{
+    <MudPaper Class="lot-detail-paper" Style="padding: 16px; max-width:600px; margin:auto;">
+       
+        <MudImage Src="@GetImageUrl()" Alt="Vehicle Image"
+        Style="width: 100%; max-height: 300px; object-fit: cover; border-radius: 8px;" />
+
+        <MudText Typo="Typo.h6" Class="mt-2">@lot.Vehicle.Make – @lot.Vehicle.Model</MudText>
+        <MudText>Lot: @lot.LotNumber</MudText>
+        <MudText>To End: @lot.EndDate:g</MudText>
+
+        @if (!bids.Any())
+        {
+            <MudText Class="mt-4">Пока нет ставок. Будьте первым!</MudText>
+        }
+        else
+        {
+            <MudText Typo="Typo.subtitle1" Class="mt-4">
+                Аукцион идёт: <b>@auctionSeconds</b> с.
+            </MudText>
+            <MudTable Items="bids" Dense="true" Hover="true" Class="mt-2">
+                <HeaderContent>
+                    <MudTh>Участник</MudTh>
+                    <MudTh>Сумма</MudTh>
+                    <MudTh>Время</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Участник">@context.Bidder</MudTd>
+                    <MudTd DataLabel="Сумма">@context.Amount:C</MudTd>
+                    <MudTd DataLabel="Время">@context.Time:HH:mm:ss</MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+
+        <MudStack Direction="Row" AlignItems="AlignItems.Center" Class="mt-4" Spacing="2">
+            <MudTextField @bind-Value="newBidder" Label="Ваше имя" Variant="Variant.Outlined" />
+            <MudNumericField @bind-Value="newAmount" Label="Сумма" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentText="₽" />
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="PlaceBid" Disabled="@(!canPlaceBid)">
+                Сделать ставку
+            </MudButton>
+        </MudStack>
+    </MudPaper>
+}
+
+@code {
+    [Parameter] public string lotNum { get; set; } = default!;
+    private LotModel lot = new();
+    private bool isLoading = true;
+
+    private List<(string Bidder, decimal Amount, DateTime Time)> bids = new();
+
+    private Timer? auctionTimer;
+    private int auctionSeconds;
+
+    private string newBidder = "";
+    private decimal newAmount;
+
+    private bool canPlaceBid => !string.IsNullOrWhiteSpace(newBidder) && newAmount > 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            lot = await LotService.GetLotByNumber(lotNum);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error loading lot: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private string GetImageUrl() => null!;
+    // => string.IsNullOrWhiteSpace(lot.Vehicle.ImageUrl)
+        //     ? "https://clipart-library.com/new_gallery/142-1420065_out-of-stock-comments-no-access-icon.png"
+        //     : lot.Vehicle.ImageUrl;
+
+    private void PlaceBid()
+    {
+        // Добавляем новую ставку
+        bids.Add((newBidder.Trim(), newAmount, DateTime.Now));
+
+        // Сбрасываем поля формы
+        newBidder = "";
+        newAmount = 0;
+
+        // Запускаем таймер при первой ставке
+        if (bids.Count == 1)
+            StartAuctionTimer();
+    }
+
+    private void StartAuctionTimer()
+    {
+        auctionSeconds = 0;
+        auctionTimer = new Timer(_ =>
+        {
+            auctionSeconds++;
+            InvokeAsync(StateHasChanged);
+        }, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+    }
+
+    public void Dispose()
+    {
+        auctionTimer?.Dispose();
+    }
+}

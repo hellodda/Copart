@@ -89,7 +89,7 @@ namespace Copart.Data.Repositories
             _logger.LogDebug("GetByLotNumberAsync invoked for LotNumber '{LotNumber}'", lotNumber);
             try
             {
-                var lot = await _context.Lots.FirstOrDefaultAsync(l => l.LotNumber == lotNumber, token);
+                var lot = await _context.Lots.Include(l => l.Vehicle).FirstOrDefaultAsync(l => l.LotNumber == lotNumber, token);
                 if (lot is null)
                     _logger.LogWarning("GetByLotNumberAsync: LotNumber '{LotNumber}' not found", lotNumber);
                 else

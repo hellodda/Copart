@@ -24,5 +24,18 @@ namespace Copart.UI.Apis.LotApi
                 throw;
             }
         }
+
+        public async Task<LotModel> GetLotByNumber(string number, CancellationToken token = default)
+        {
+            try
+            {
+                return await _client.GetFromJsonAsync<LotModel>($"/Lot/{number}", token);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching lots: {ex.Message}");
+                throw;
+            }
+        }
     }
 }

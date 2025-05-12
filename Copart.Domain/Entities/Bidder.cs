@@ -1,6 +1,6 @@
 ﻿namespace Copart.Domain.Entities
 {
-    public class User
+    public class Bidder
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;

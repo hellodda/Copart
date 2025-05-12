@@ -1,23 +1,32 @@
 ﻿@page "/auctions"
 @using Copart.BLL.Models.LotModels
 @inject ILotApi LotApi
+@inject NavigationManager NavigationManager
 
 <PageTitle>Auctions</PageTitle>
 
-<MudDataGrid T="LotModel" Items="lots" Loading="isLoading">
+<MudDataGrid Items="@lots" Loading="isLoading">
     <Columns>
-        <PropertyColumn Property="x => x.Id" Title="ID" />
-        <PropertyColumn Property="x => x.LotNumber" Title="№ лота" />
-        <PropertyColumn Property="x => x.StartDate" Title="Старт" />
-        <PropertyColumn Property="x => x.EndDate" Title="Финиш" />
-        <PropertyColumn Property="x => x.CurrentBid" Title="Тек. ставка" />
-        <PropertyColumn Property="x => x.Vehicle.Model" Title="Модель" />
+        <PropertyColumn Property="x => x.LotNumber" Title="Lot Num" />
+        <PropertyColumn Property="x => x.StartDate" Title="Start" />
+        <PropertyColumn Property="x => x.EndDate" Title="Finish" />
+        <PropertyColumn Property="x => x.CurrentBid" Title="Curr bid" />
+        <PropertyColumn Property="x => x.Vehicle.Model" Title="Vehicle Model" />
+
+        <TemplateColumn Title="Actions">
+            <CellTemplate>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => NavigateToLot(context.Item)">
+                    Details
+                </MudButton>
+            </CellTemplate>
+        </TemplateColumn>
     </Columns>
 </MudDataGrid>
 
 @code {
     private List<LotModel> lots = new();
     private bool isLoading = true;
+    private Timer timer = null!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -34,5 +43,24 @@
         {
             isLoading = false;
         }
+        TimerStart();
+    }
+
+    private void TimerStart()
+    {
+        timer = new Timer((state) =>
+        {
+            InvokeAsync(StateHasChanged);
+        }, null, 1000, 1000);
+    }
+
+    public void Dispose()
+    {
+        timer?.Dispose();
+    }
+
+    public void NavigateToLot(LotModel lot)
+    {
+        NavigationManager.NavigateTo($"/lotdetail/{lot.LotNumber}");
     }
 }

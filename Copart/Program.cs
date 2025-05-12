@@ -23,7 +23,7 @@ if (app.Environment.IsDevelopment())
 
 app.Configure();
 
-//app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 

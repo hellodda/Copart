@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Copart.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class BidController : ControllerBase
     {
         private readonly IBidService _bidService;

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Copart.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class LotController : ControllerBase
     {
         private readonly ILotService _service;

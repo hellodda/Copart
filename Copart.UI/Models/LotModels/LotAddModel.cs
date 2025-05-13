@@ -1,6 +1,6 @@
-﻿using Copart.BLL.Models.VehicleModels;
+﻿using Copart.UI.Models.VehicleModels;
 
-namespace Copart.BLL.Models.LotModels
+namespace Copart.UI.Models.LotModels
 {
     public class LotAddModel
     {

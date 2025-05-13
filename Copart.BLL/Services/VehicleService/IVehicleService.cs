@@ -4,7 +4,7 @@ using FluentValidation;
 
 namespace Copart.BLL.Services.VehicleService
 {
-    public interface IVehicleService
+    public interface IVehicleService : IService
     {
         public Task<Result<VehicleModel>> GetByIdAsync(int id, CancellationToken token = default);
         public Task<Result<IEnumerable<VehicleModel>>> GetAllAsync(CancellationToken token = default);

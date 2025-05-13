@@ -9,6 +9,7 @@ using Copart.BLL.Services.BidService;
 using Copart.BLL.Services.BidderService;
 using FluentValidation;
 using Copart.BLL.Validators;
+using Copart.BLL.Services.SearchService;
 
 namespace Copart.Api.Extensions
 {
@@ -21,6 +22,7 @@ namespace Copart.Api.Extensions
             builder.Services.AddScoped<ILotService, LotService>();
             builder.Services.AddScoped<IBidService, BidService>();
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<ISearchService, SearchService>();
             builder.Services.AddSignalR();
             builder.Services.AddValidatorsFromAssemblyContaining<BidValidator>(ServiceLifetime.Transient);
             builder.Services.AddAutoMapper(typeof(LotProfile));

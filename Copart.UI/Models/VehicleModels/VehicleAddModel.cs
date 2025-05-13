@@ -1,6 +1,6 @@
-﻿using Copart.Domain.Enums;
+﻿using Copart.UI.Models.Enums;
 
-namespace Copart.BLL.Models.VehicleModels
+namespace Copart.UI.Models.VehicleModels
 {
     public class VehicleAddModel
     {

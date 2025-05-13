@@ -1,5 +1,5 @@
 ﻿@inherits LayoutComponentBase
-
+@inject NavigationManager NavigationManager
 
 <MudThemeProvider />
 <MudPopoverProvider />
@@ -15,7 +15,7 @@
                 </a>
 
                 <form class="d-flex flex-grow-1 mx-3" style="max-width: 700px;">
-                   <SearchBox Items="test" PlaceHolder="Vin, Damage, Model, ..."/>
+                    <SearchBox PlaceHolder="Vin, Damage, Model, ..." OnSearch="Search"/>
                 </form>
 
                 <div class="d-flex align-items-center gap-2">
@@ -49,5 +49,8 @@
     </main>
 </div>
 @code{
-    List<string> test = new();
+    private void Search(string query)
+    {
+        NavigationManager.NavigateTo($"/search/{query}");
+    }
 }

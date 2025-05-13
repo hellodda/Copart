@@ -1,4 +1,4 @@
-﻿using Copart.BLL.Models.LotModels;
+﻿using Copart.UI.Models.LotModels;
 using System.Net.Http.Json;
 
 namespace Copart.UI.Apis.LotApi

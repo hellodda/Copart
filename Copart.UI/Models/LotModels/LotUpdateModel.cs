@@ -1,4 +1,4 @@
-﻿namespace Copart.BLL.Models.LotModels
+﻿namespace Copart.UI.Models.LotModels
 {
     public class LotUpdateModel
     {

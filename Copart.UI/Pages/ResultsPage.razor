@@ -1,0 +1,42 @@
+﻿@page "/search/{query}"
+@using Copart.UI.Apis.SearchApi;
+@using Copart.UI.Models
+@using Copart.UI.Models.VehicleModels
+@inject ISearchApi SearchApi;
+
+<MudDataGrid Items="result" Loading="isLoading">
+    <Columns>
+        <PropertyColumn Property="x => x.Make" Title="Make" />
+        <PropertyColumn Property="x => x.Model" Title="Model" />
+        <PropertyColumn Property="x => x.Vin" Title="Vin" />
+    </Columns>
+</MudDataGrid>
+
+
+
+
+
+@code {
+    
+    [Parameter] public string query { get; set; } = default!;
+
+    private IEnumerable<VehicleModel> result = new List<VehicleModel>();
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            result = (await SearchApi.Search(query)).ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error loading lot: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+}

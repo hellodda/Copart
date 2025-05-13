@@ -1,11 +1,7 @@
-﻿@typeparam TItem
-
-<input @bind=_searchItem class="form-control me-2" type="search" placeholder="@PlaceHolder" aria-label="Search" style="min-width: 0;">
+﻿<input @bind=_searchItem class="form-control me-2" type="search" placeholder="@PlaceHolder" aria-label="Search" style="min-width: 0;">
 <button @onclick=OnSearchClicked class="btn btn-warning px-3" type="submit">Search</button>
 
 @code {
-    [Parameter]
-    public List<TItem> Items { get; set; } = new();
 
     [Parameter]
     public EventCallback<string> OnSearch { get; set; }

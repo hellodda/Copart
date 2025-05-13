@@ -1,4 +1,4 @@
-﻿namespace Copart.Domain.Enums
+﻿namespace Copart.UI.Models.Enums
 {
     public enum VehicleType
     {

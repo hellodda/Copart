@@ -4,7 +4,7 @@ using FluentValidation;
 
 namespace Copart.BLL.Services.BidService
 {
-    public interface IBidService
+    public interface IBidService : IService
     {
         public Task<Result<IEnumerable<BidModel?>?>> GetAllAsync(CancellationToken token = default);
         public Task<Result<BidModel?>> GetByIdAsync(int id, CancellationToken token = default);

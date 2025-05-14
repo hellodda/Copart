@@ -1,3 +1,74 @@
 ﻿@page "/how-it-works"
+@using MudBlazor
 
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-12">
 
+    <MudText Typo="Typo.h3" Align="Align.Center" GutterBottom="true">How Copart Works</MudText>
+    <MudText Typo="Typo.subtitle1" Align="Align.Center" GutterBottom="true">
+        Buy used and salvage vehicles easily through our online auction platform.
+    </MudText>
+
+    <MudStepper Elevation="0" Linear="false" Class="mt-8">
+        <MudStep Label="1. Register">
+            <MudPaper Class="p-4">
+                <MudText Typo="Typo.h6">Create Your Account</MudText>
+                <MudText>
+                    Sign up for a free basic account or choose a premium membership to unlock full bidding access.
+                </MudText>
+            </MudPaper>
+        </MudStep>
+
+        <MudStep Label="2. Search Vehicles">
+            <MudPaper Class="p-4">
+                <MudText Typo="Typo.h6">Find What You Need</MudText>
+                <MudText>
+                    Browse or filter thousands of cars, trucks, SUVs, and more. Use detailed search tools to find the perfect match.
+                </MudText>
+            </MudPaper>
+        </MudStep>
+
+        <MudStep Label="3. Bid & Win">
+            <MudPaper Class="p-4">
+                <MudText Typo="Typo.h6">Participate in Auctions</MudText>
+                <MudText>
+                    Place preliminary bids or join live online auctions. Highest bidder wins and gets to purchase the vehicle.
+                </MudText>
+            </MudPaper>
+        </MudStep>
+
+        <MudStep Label="4. Pay & Pick Up">
+            <MudPaper Class="p-4">
+                <MudText Typo="Typo.h6">Complete the Transaction</MudText>
+                <MudText>
+                    Make your payment and arrange pickup or shipping. Copart also offers support with transportation.
+                </MudText>
+            </MudPaper>
+        </MudStep>
+    </MudStepper>
+
+    <MudDivider Class="my-6" />
+
+    <MudGrid GutterSize="3">
+        <MudItem xs="12" sm="6">
+            <MudCard>
+                <MudCardContent>
+                    <MudText Typo="Typo.h6">What Is Copart?</MudText>
+                    <MudText>
+                        Copart is a global leader in online car auctions. We help buyers purchase vehicles from insurance companies, dealerships, and more.
+                    </MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6">
+            <MudCard>
+                <MudCardContent>
+                    <MudText Typo="Typo.h6">Who Can Buy?</MudText>
+                    <MudText>
+                        Whether you're a licensed dealer, dismantler, or a public buyer, Copart has vehicle inventory for all types of customers.
+                    </MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+</MudContainer>

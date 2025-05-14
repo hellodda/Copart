@@ -1,40 +1,62 @@
 ﻿@page "/auctions"
 @using Copart.UI.Models.LotModels
-@using Copart.UI.Models.LotModels
 @inject ILotApi LotApi
 @inject NavigationManager NavigationManager
 
 <PageTitle>Auctions</PageTitle>
 
-<MudDataGrid Items="@lots" Loading="isLoading">
-    <Columns>
-        <PropertyColumn Property="x => x.LotNumber" Title="Lot Num" />
-        <PropertyColumn Property="x => x.StartDate" Title="Start" />
-        <PropertyColumn Property="x => x.EndDate" Title="Finish" />
-        <PropertyColumn Property="x => x.CurrentBid" Title="Curr bid" />
-        <PropertyColumn Property="x => x.Vehicle.Model" Title="Vehicle Model" />
+<MudPaper Class="p-4">
 
-        <TemplateColumn Title="Actions">
-            <CellTemplate>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => NavigateToLot(context.Item)">
-                    Details
-                </MudButton>
-            </CellTemplate>
-        </TemplateColumn>
-    </Columns>
-</MudDataGrid>
+    <MudText Typo="Typo.h5" Class="mb-2">Live Auctions</MudText>
+
+    @if (isLoading)
+    {
+        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+    }
+    else if (lots?.Any() == true)
+    {
+        <MudDataGrid Items="@lots" Loading="isLoading" Hover="true" Dense="true" Bordered="true" Breakpoint="Breakpoint.Sm">
+            <Columns>
+                <PropertyColumn Property="x => x.LotNumber" Title="Lot #" />
+                <PropertyColumn Property="x => x.StartDate.ToString()" Title="Start" />
+                <PropertyColumn Property="x => x.EndDate.ToString()" Title="Finish" />
+                <PropertyColumn Property="x => x.CurrentBid" Title="Current Bid" />
+                <PropertyColumn Property="x => x.Vehicle.Model" Title="Vehicle Model" />
+                <TemplateColumn Title="Actions">
+                    <CellTemplate>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => NavigateToLot(context.Item)">
+                            Details
+                        </MudButton>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+        </MudDataGrid>
+    }
+    else
+    {
+        <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true">
+            No auctions available at this time.
+        </MudAlert>
+    }
+
+</MudPaper>
 
 @code {
     private List<LotModel> lots = new();
     private bool isLoading = true;
-    private Timer timer = null!;
+    private Timer? timer;
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadLotsAsync();
+        StartAutoRefresh();
+    }
+
+    private async Task LoadLotsAsync()
+    {
         try
         {
-            var data = await LotApi.GetAll();
-            lots = data.ToList();
+            lots = (await LotApi.GetAll()).ToList();
         }
         catch (Exception ex)
         {
@@ -44,15 +66,14 @@
         {
             isLoading = false;
         }
-        TimerStart();
     }
 
-    private void TimerStart()
+    private void StartAutoRefresh()
     {
-        timer = new Timer((state) =>
+        timer = new Timer(async _ =>
         {
-            InvokeAsync(StateHasChanged);
-        }, null, 1000, 1000);
+            await InvokeAsync(StateHasChanged);
+        }, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
     }
 
     public void Dispose()
@@ -60,7 +81,7 @@
         timer?.Dispose();
     }
 
-    public void NavigateToLot(LotModel lot)
+    private void NavigateToLot(LotModel lot)
     {
         NavigationManager.NavigateTo($"/lotdetail/{lot.LotNumber}");
     }

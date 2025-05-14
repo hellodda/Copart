@@ -1,26 +1,53 @@
 ﻿@page "/"
 
+<MudPaper Class="homepage-wrapper" Elevation="0">
 
-<MudPaper Elevation="0" Height="2500px" Width="100%">
-    
-    <MudCarousel Class="mud-width-full" Style="height:500px;" ShowArrows="@arrows" ShowBullets="@bullets" EnableSwipeGesture="@enableSwipeGesture" AutoCycle="@autocycle" TData="object">
-        <MudCarouselItem Transition="transition">
-            <div class="d-flex justify-content-center align-items-center" style="height:100%;">
-                <img src="Resources/Example.png" class="img-fluid" />
-            </div>
-        </MudCarouselItem>
-        <MudCarouselItem Transition="transition">
-            <div class="d-flex justify-content-center align-items-center" style="height:100%;">
-                <img src="Resources/Example-3.png" class="img-fluid" />
-            </div>
-        </MudCarouselItem>
-        <MudCarouselItem Transition="transition">
-            <div class="d-flex justify-content-center align-items-center" style="height:100%;">
-                <img src="Resources/Example-2.png" class="img-fluid" />
-            </div>
-        </MudCarouselItem>
-    </MudCarousel>
-   
+    <div class="carousel-section">
+        <MudCarousel Class="mud-width-full animated-carousel"
+                     Style="height:500px;"
+                     ShowArrows="@arrows"
+                     ShowBullets="@bullets"
+                     EnableSwipeGesture="@enableSwipeGesture"
+                     AutoCycle="@autocycle"
+                     TData="object">
+            <MudCarouselItem Transition="transition">
+                <div class="carousel-item-content">
+                    <img src="Resources/Example.png" class="carousel-img fade-in" />
+                    <div class="carousel-caption zoom-in">
+                        <MudText Typo="Typo.h4" Class="text-white">Explore Our Auctions</MudText>
+                        <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="@(() => NavigateTo("/auctions"))">
+                            View Auctions
+                        </MudButton>
+                    </div>
+                </div>
+            </MudCarouselItem>
+
+            <MudCarouselItem Transition="transition">
+                <div class="carousel-item-content">
+                    <img src="Resources/Example-3.png" class="carousel-img fade-in" />
+                    <div class="carousel-caption zoom-in">
+                        <MudText Typo="Typo.h4" Class="text-white">Search Thousands of Vehicles</MudText>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => NavigateTo("/search/suv"))">
+                            Search Now
+                        </MudButton>
+                    </div>
+                </div>
+            </MudCarouselItem>
+
+            <MudCarouselItem Transition="transition">
+                <div class="carousel-item-content">
+                    <img src="Resources/Example-2.png" class="carousel-img fade-in" />
+                    <div class="carousel-caption zoom-in">
+                        <MudText Typo="Typo.h4" Class="text-white">Join the Marketplace</MudText>
+                        <MudButton Variant="Variant.Filled" Color="Color.Tertiary" OnClick="@(() => NavigateTo("/signup"))">
+                            Get Started
+                        </MudButton>
+                    </div>
+                </div>
+            </MudCarouselItem>
+        </MudCarousel>
+    </div>
+
 </MudPaper>
 
 @code {
@@ -29,5 +56,12 @@
     private bool enableSwipeGesture = true;
     private bool autocycle = true;
     private Transition transition = Transition.Slide;
-}
 
+    private void NavigateTo(string url)
+    {
+        NavigationManager.NavigateTo(url);
+    }
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = default!;
+}

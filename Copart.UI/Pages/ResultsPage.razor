@@ -1,26 +1,42 @@
 ﻿@page "/search/{query}"
-@using Copart.UI.Apis.SearchApi;
+@using Copart.UI.Apis.SearchApi
 @using Copart.UI.Models
 @using Copart.UI.Models.VehicleModels
-@inject ISearchApi SearchApi;
+@inject ISearchApi SearchApi
 
-<MudDataGrid Items="result" Loading="isLoading">
-    <Columns>
-        <PropertyColumn Property="x => x.Make" Title="Make" />
-        <PropertyColumn Property="x => x.Model" Title="Model" />
-        <PropertyColumn Property="x => x.Vin" Title="Vin" />
-    </Columns>
-</MudDataGrid>
+<MudPaper Class="p-4">
 
+    <MudText Typo="Typo.h5" Class="mb-2">Search results for "@query"</MudText>
 
+    @if (isLoading)
+    {
+        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+    }
+    else if (result.Any())
+    {
+        <MudText Typo="Typo.subtitle2" Class="mb-2">@($"{result.Count()} results found")</MudText>
 
+        <MudDataGrid Items="result" Loading="isLoading" Hover="true" Dense="true" Bordered="true" Breakpoint="Breakpoint.Sm">
+            <Columns>
+                <PropertyColumn Property="x => x.Make" Title="Make" />
+                <PropertyColumn Property="x => x.Model" Title="Model" />
+                <PropertyColumn Property="x => x.Vin" Title="VIN" />
+            </Columns>
+        </MudDataGrid>
+    }
+    else
+    {
+        <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true">
+            No vehicles found matching your search query.
+        </MudAlert>
+    }
 
+</MudPaper>
 
 @code {
-    
     [Parameter] public string query { get; set; } = default!;
 
-    private IEnumerable<VehicleModel> result = new List<VehicleModel>();
+    private List<VehicleModel> result = new();
     private bool isLoading = true;
 
     protected override async Task OnInitializedAsync()
@@ -31,12 +47,11 @@
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine($"Error loading lot: {ex.Message}");
+            Console.Error.WriteLine($"Error loading search results: {ex.Message}");
         }
         finally
         {
             isLoading = false;
         }
     }
-
 }

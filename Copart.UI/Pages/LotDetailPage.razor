@@ -23,30 +23,10 @@ else
         }
         else
         {
-            <MudText Typo="Typo.subtitle1" Class="mt-4">
-                Аукцион идёт: <b>@auctionSeconds</b> с.
-            </MudText>
-            <MudTable Items="bids" Dense="true" Hover="true" Class="mt-2">
-                <HeaderContent>
-                    <MudTh>Участник</MudTh>
-                    <MudTh>Сумма</MudTh>
-                    <MudTh>Время</MudTh>
-                </HeaderContent>
-                <RowTemplate>
-                    <MudTd DataLabel="Участник">@context.Bidder</MudTd>
-                    <MudTd DataLabel="Сумма">@context.Amount:C</MudTd>
-                    <MudTd DataLabel="Время">@context.Time:HH:mm:ss</MudTd>
-                </RowTemplate>
-            </MudTable>
+           
         }
 
-        <MudStack Direction="Row" AlignItems="AlignItems.Center" Class="mt-4" Spacing="2">
-            <MudTextField @bind-Value="newBidder" Label="Ваше имя" Variant="Variant.Outlined" />
-            <MudNumericField @bind-Value="newAmount" Label="Сумма" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentText="₽" />
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="PlaceBid" Disabled="@(!canPlaceBid)">
-                Сделать ставку
-            </MudButton>
-        </MudStack>
+       
     </MudPaper>
 }
 

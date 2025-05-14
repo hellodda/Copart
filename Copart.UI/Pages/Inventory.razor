@@ -1,15 +1,56 @@
 ﻿@page "/inventory"
+@using Copart.UI.Models.VehicleModels
+@using Copart.UI.Apis.VehicleApi
+@inject IVehicleApi VehicleApi
 
-<MudPaper Elevation="0" Class="d-flex" >
-    <MudPaper Outlined="true" Style="width: 250px; border-radius: 12px;" Height="550">
-    </MudPaper>
+<MudPaper Class="p-4" Elevation="0">
 
-    <MudPaper Elevation="0" Class="pa-4" Style="flex: 1;">
-      
-    </MudPaper>
+    <MudText Typo="Typo.h5" Class="mb-2">All Vehicles</MudText>
+
+    @if (isLoading)
+    {
+        <MudProgressCircular Indeterminate="true" Color="Color.Warning" />
+    }
+    else if (vehicles.Any())
+    {
+        <MudText Typo="Typo.subtitle2" Class="mb-2">@($"{vehicles.Count()} vehicles")</MudText>
+
+        <MudDataGrid Items="vehicles" Loading="isLoading" Hover="true" Dense="true" Bordered="true" Breakpoint="Breakpoint.Sm">
+            <Columns>
+                <PropertyColumn Property="x => x.Make" Title="Make" />
+                <PropertyColumn Property="x => x.Model" Title="Model" />
+                <PropertyColumn Property="x => x.Vin" Title="VIN" />
+            </Columns>
+        </MudDataGrid>
+    }
+    else
+    {
+        <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true">
+            No vehicles found matching your search query.
+        </MudAlert>
+    }
+
 </MudPaper>
 
-
 @code {
+
+    private List<VehicleModel> vehicles = new();
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            vehicles = (await VehicleApi.GetAll()).ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error loading search results: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
 
 }

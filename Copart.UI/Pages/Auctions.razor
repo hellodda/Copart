@@ -5,16 +5,18 @@
 
 <PageTitle>Auctions</PageTitle>
 
-<MudPaper Class="p-4">
+<MudPaper Class="p-4" Elevation="0">
 
     <MudText Typo="Typo.h5" Class="mb-2">Live Auctions</MudText>
 
     @if (isLoading)
     {
-        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+        <MudProgressCircular Indeterminate="true" Color="Color.Warning" />
     }
     else if (lots?.Any() == true)
     {
+        <MudText Typo="Typo.subtitle2" Class="mb-2">@($"{lots.Count()} lots found")</MudText>
+
         <MudDataGrid Items="@lots" Loading="isLoading" Hover="true" Dense="true" Bordered="true" Breakpoint="Breakpoint.Sm">
             <Columns>
                 <PropertyColumn Property="x => x.LotNumber" Title="Lot #" />
@@ -24,7 +26,7 @@
                 <PropertyColumn Property="x => x.Vehicle.Model" Title="Vehicle Model" />
                 <TemplateColumn Title="Actions">
                     <CellTemplate>
-                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => NavigateToLot(context.Item)">
+                        <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick="() => NavigateToLot(context.Item)">
                             Details
                         </MudButton>
                     </CellTemplate>

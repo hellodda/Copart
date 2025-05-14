@@ -4,13 +4,13 @@
 @using Copart.UI.Models.VehicleModels
 @inject ISearchApi SearchApi
 
-<MudPaper Class="p-4">
+<MudPaper Class="p-4" Elevation="0">
 
     <MudText Typo="Typo.h5" Class="mb-2">Search results for "@query"</MudText>
 
     @if (isLoading)
     {
-        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+        <MudProgressCircular Indeterminate="true" Color="Color.Warning" />
     }
     else if (result.Any())
     {

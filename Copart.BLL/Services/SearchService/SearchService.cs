@@ -19,7 +19,7 @@ namespace Copart.BLL.Services.SearchService
             try
             {
                 var service = _serviceProvider.GetRequiredService<ST>();
-                if (service == null)
+                if (service is null)
                     return Result<IEnumerable<T>>.Fail("Cannot find service");
 
                 var methods = service.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
@@ -27,7 +27,7 @@ namespace Copart.BLL.Services.SearchService
                 foreach (var method in methods)
                 {
                     var attributes = method.GetCustomAttributes(typeof(UseForSearchAttribute), inherit: true);
-                    if (attributes == null || !attributes.Any())
+                    if (attributes is null || !attributes.Any())
                         continue;
 
                     if (method.ReturnType != typeof(Task<Result<IEnumerable<T>>>))
@@ -37,7 +37,7 @@ namespace Copart.BLL.Services.SearchService
                     var result = await task;
                     var allItems = result.Data;
 
-                    if (allItems == null)
+                    if (allItems is null)
                         return Result<IEnumerable<T>>.Fail("No data returned from search method");
 
                     var filteredItems = allItems.Where(item =>

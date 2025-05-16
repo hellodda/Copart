@@ -1,4 +1,6 @@
-﻿using Copart.BLL.Results;
+﻿using Copart.BLL.Attributes;
+using Copart.BLL.Results;
+using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
 namespace Copart.BLL.Services.SearchService
@@ -16,30 +18,45 @@ namespace Copart.BLL.Services.SearchService
         {
             try
             {
-                var service = (ST)_serviceProvider.GetService(typeof(ST))!;
+                var service = _serviceProvider.GetRequiredService<ST>();
                 if (service == null)
-                    return Result<IEnumerable<T>>.Fail("Canot find service");
+                    return Result<IEnumerable<T>>.Fail("Cannot find service");
 
-                var method = typeof(ST).GetMethod("GetAllAsync");
-                if (method == null)
-                    return Result<IEnumerable<T>>.Fail("Method Not Found");
+                var methods = service.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
-                var task = (Task<Result<IEnumerable<T>>>)method.Invoke(service, [CancellationToken.None])!;
-                var allItems = (await task).Data;
+                foreach (var method in methods)
+                {
+                    var attributes = method.GetCustomAttributes(typeof(UseForSearchAttribute), inherit: true);
+                    if (attributes == null || !attributes.Any())
+                        continue;
 
-                var filteredItems = allItems!.Where(item =>
-                    item!.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                    if (method.ReturnType != typeof(Task<Result<IEnumerable<T>>>))
+                        continue;
+
+                    var task = (Task<Result<IEnumerable<T>>>)method.Invoke(service, new object[] { CancellationToken.None })!;
+                    var result = await task;
+                    var allItems = result.Data;
+
+                    if (allItems == null)
+                        return Result<IEnumerable<T>>.Fail("No data returned from search method");
+
+                    var filteredItems = allItems.Where(item =>
+                        item!.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
                         .Where(p => p.PropertyType == typeof(string))
                         .Select(p => (string)p.GetValue(item)!)
                         .Any(value => value != null && value.Contains(query, StringComparison.OrdinalIgnoreCase))
-                );
+                    );
 
-                return Result<IEnumerable<T>>.Ok(filteredItems);
+                    return Result<IEnumerable<T>>.Ok(filteredItems);
+                }
+
+                return Result<IEnumerable<T>>.Fail("No suitable method with [UseForSearch] found.");
             }
             catch (Exception ex)
             {
                 return Result<IEnumerable<T>>.Fail($"Search Error: {ex.Message}");
             }
         }
+
     }
 }

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Copart.BLL.Attributes;
 using Copart.BLL.Models.BidModels;
 using Copart.BLL.Models.LotModels;
 using Copart.BLL.Results;

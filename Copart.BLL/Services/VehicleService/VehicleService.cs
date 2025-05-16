@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Copart.BLL.Attributes;
 using Copart.BLL.Models.VehicleModels;
 using Copart.BLL.Results;
 using Copart.Domain.BaseRepositories;
@@ -68,6 +69,7 @@ namespace Copart.BLL.Services.VehicleService
             }
         }
 
+        [UseForSearch]
         public async Task<Result<IEnumerable<VehicleModel>>> GetAllAsync(CancellationToken token = default)
         {
             _logger.LogDebug("GetAllAsync invoked");

@@ -39,6 +39,19 @@ namespace Copart.UI.Apis.LotApi
             }
         }
 
+        public async Task<IEnumerable<BidModel>> GetAllBids(int id, CancellationToken token = default)
+        {
+            try
+            {
+                return await _client.GetFromJsonAsync<IEnumerable<BidModel>>($"/Lot/{id}/bids", token);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching lots: {ex.Message}");
+                throw;
+            }
+        }
+
         public async Task<BidModel> GetBiggestBid(int id, CancellationToken token = default)
         {
             try

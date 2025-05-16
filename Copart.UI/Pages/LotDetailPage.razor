@@ -1,59 +1,113 @@
 ﻿@page "/lotdetail/{lotNum}"
-@using Copart.UI.Models.LotModels
-@inject ILotApi LotService
+@using Copart.UI.Models.BidModels
+@inject ILotApi LotApi
+@inject ISnackbar Snackbar
 
-@if (isLoading)
-{
-    <MudProgressCircular Color="Color.Warning" Indeterminate="true" />
-}
-else
-{
-    <MudPaper Class="lot-detail-paper" Style="padding: 16px; max-width:600px; margin:auto;">
-       
-        <MudImage Src="@GetImageUrl()" Alt="Vehicle Image"
-        Style="width: 100%; max-height: 300px; object-fit: cover; border-radius: 8px;" />
+<MudPaper Class="lot-detail-paper" Style="padding: 24px; max-width:800px; margin:auto;">
 
-        <MudText Typo="Typo.h6" Class="mt-2">@lot.Vehicle.Make – @lot.Vehicle.Model</MudText>
-        <MudText>Lot: @lot.LotNumber</MudText>
-        <MudText>To End: @lot.EndDate:g</MudText>
+    @if (isLoading)
+    {
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+    }
+    else if (lot is not null)
+    {
+        <MudText Typo="Typo.h4" GutterBottom="true">Lot #@lot.LotNumber</MudText>
+        <MudText Typo="Typo.subtitle1" Color="Color.Secondary">Current Bid: @lot.CurrentBid.ToString("C")</MudText>
 
-        @if (!bids.Any())
+        <MudDivider Class="my-4" />
+
+        <MudGrid>
+            <MudItem xs="12" md="6">
+                <MudTextField @bind-Value="amount"
+                              Label="Enter Your Bid"
+                              Variant="Variant.Filled"
+                              Type="number"
+                              Adornment="Adornment.End"
+                              AdornmentText="$"
+                              Immediate="true"
+                              Style="width: 100%;" />
+            </MudItem>
+            <MudItem xs="12" md="6" Class="d-flex align-items-center">
+                <MudButton OnClick="PlaceBid"
+                           Color="Color.Primary"
+                           Variant="Variant.Filled"
+                           Disabled="!IsValidBid"
+                           Style="margin-top: 8px;">
+                    Submit Bid
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+
+        <MudDivider Class="my-4" />
+
+        <MudText Typo="Typo.h6">Highest Bid</MudText>
+        @if (biggestBid is not null)
         {
-            <MudText Class="mt-4">Пока нет ставок. Будьте первым!</MudText>
+            <MudPaper Class="pa-3 my-2" Style="background-color: #f5f5f5;">
+                <MudText><b>Amount:</b> @biggestBid.Amount.ToString("C")</MudText>
+                <MudText><b>User:</b> User #@biggestBid.UserId</MudText>
+            </MudPaper>
         }
         else
         {
-           
+            <MudText>No bids yet.</MudText>
         }
 
-       
-    </MudPaper>
-}
+        <MudDivider Class="my-4" />
+
+        <MudText Typo="Typo.h6">All Bids</MudText>
+        @if (bids.Any())
+        {
+            <MudTable Items="bids" Dense="true" Elevation="0" Hover="true" Bordered="true">
+                <HeaderContent>
+                    <MudTh>User ID</MudTh>
+                    <MudTh>Amount</MudTh>
+                    <MudTh>Time</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="User">@context.UserId</MudTd>
+                    <MudTd DataLabel="Amount">@context.Amount.ToString("C")</MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+        else
+        {
+            <MudText>No bids found for this lot.</MudText>
+        }
+    }
+    else
+    {
+        <MudAlert Severity="Severity.Error">Lot not found.</MudAlert>
+    }
+
+</MudPaper>
 
 @code {
     [Parameter] public string lotNum { get; set; } = default!;
-    private LotModel lot = new();
+    private LotModel? lot;
+    private List<BidModel> bids = new();
+    private BidModel? biggestBid;
     private bool isLoading = true;
-
-    private List<(string Bidder, decimal Amount, DateTime Time)> bids = new();
-
-    private Timer? auctionTimer;
-    private int auctionSeconds;
-
-    private string newBidder = "";
-    private decimal newAmount;
-
-    private bool canPlaceBid => !string.IsNullOrWhiteSpace(newBidder) && newAmount > 0;
+    private int amount;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            lot = await LotService.GetLotByNumber(lotNum);
+            lot = await LotApi.GetLotByNumber(lotNum);
+
+            if (lot is null)
+            {
+                Snackbar.Add("Lot not found.", Severity.Error);
+                return;
+            }
+
+            bids = (await LotApi.GetAllBids(lot.Id)).ToList();
+            biggestBid = await LotApi.GetBiggestBid(lot.Id);
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine($"Error loading lot: {ex.Message}");
+            Snackbar.Add($"Error loading lot: {ex.Message}", Severity.Error);
         }
         finally
         {
@@ -61,37 +115,33 @@ else
         }
     }
 
-    private string GetImageUrl() => null!;
-    // => string.IsNullOrWhiteSpace(lot.Vehicle.ImageUrl)
-        //     ? "https://clipart-library.com/new_gallery/142-1420065_out-of-stock-comments-no-access-icon.png"
-        //     : lot.Vehicle.ImageUrl;
+    private bool IsValidBid => amount > 0;
 
-    private void PlaceBid()
+    private async Task PlaceBid()
     {
-        // Добавляем новую ставку
-        bids.Add((newBidder.Trim(), newAmount, DateTime.Now));
-
-        // Сбрасываем поля формы
-        newBidder = "";
-        newAmount = 0;
-
-        // Запускаем таймер при первой ставке
-        if (bids.Count == 1)
-            StartAuctionTimer();
-    }
-
-    private void StartAuctionTimer()
-    {
-        auctionSeconds = 0;
-        auctionTimer = new Timer(_ =>
+        if (lot is null)
         {
-            auctionSeconds++;
-            InvokeAsync(StateHasChanged);
-        }, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
-    }
+            Snackbar.Add("Lot not found.", Severity.Error);
+            return;
+        }
 
-    public void Dispose()
-    {
-        auctionTimer?.Dispose();
+        try
+        {
+            await LotApi.AddBid(lot.Id, new BidAddModel
+                {
+                    Amount = amount,
+                    LotId = lot.Id,
+                    UserId = 10 
+                });
+
+            Snackbar.Add("Bid successfully placed!", Severity.Success);
+
+            bids = (await LotApi.GetAllBids(lot.Id)).ToList();
+            biggestBid = await LotApi.GetBiggestBid(lot.Id);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error placing bid: {ex.Message}", Severity.Error);
+        }
     }
 }

@@ -8,6 +8,7 @@ namespace Copart.BLL.Services.LotService
     public interface ILotService : IService
     {
         public Task<Result<IEnumerable<LotModel?>?>> GetAllAsync(CancellationToken token = default);
+        public Task<Result<IEnumerable<BidModel>>> GetAllBidsAsync(int id, CancellationToken token = default);
         public Task<Result<LotModel?>> GetByIdAsync(int id, CancellationToken token = default);
         public Task<Result<LotModel?>> GetByLotNumberAsync(string lotNumber, CancellationToken token = default);
         public Task<Result<BidModel?>> GetBiggestBidAsync(int lotId, CancellationToken token = default);

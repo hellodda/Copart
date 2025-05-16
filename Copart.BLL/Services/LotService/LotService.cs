@@ -232,5 +232,27 @@ namespace Copart.BLL.Services.LotService
             }
         }
 
+        public async Task<Result<IEnumerable<BidModel>>> GetAllBidsAsync(int id, CancellationToken token = default)
+        {
+            _logger.LogDebug("GetAllBidsAsync invoked for Lot Id={LotId}", id);
+            try
+            {
+                var entity = await _uow.LotRepository.GetByIdAsync(id, token).ConfigureAwait(false);
+                if (entity is null)
+                {
+                    _logger.LogWarning("GetAllBidsAsync failed: Lot not found, Id={LotId}", id);
+                    return Result<IEnumerable<BidModel>>.Fail("Lot not found")!;
+                }
+                var models = entity.Bids.Select(b => _mapper.Map<BidModel>(b));
+                _logger.LogInformation("Retrieved {Count} bids for Lot Id={LotId}", models.Count(), id);
+                return Result<IEnumerable<BidModel>>.Ok(models)!;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving all bids for Lot Id={LotId}", id);
+                return Result<IEnumerable<BidModel>>.Fail("An error occurred while retrieving bids.")!;
+            }
+
+        }
     }
 }

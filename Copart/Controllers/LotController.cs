@@ -45,7 +45,7 @@ namespace Copart.Api.Controllers
             return Ok(result.Data);
         }
 
-        [HttpGet("by-number/{lotNumber}")]
+        [HttpGet("{lotNumber}")]
         public async Task<IActionResult> GetByLotNumber(string lotNumber, CancellationToken token)
         {
             _logger.LogDebug("GET /api/Lot/by-number/{LotNumber} called", lotNumber);
@@ -145,6 +145,20 @@ namespace Copart.Api.Controllers
                     : BadRequest(result.Message);
             }
             return Ok(result.Message);
+        }
+    
+
+        [HttpGet("{id:int}/bids")]
+        public async Task<IActionResult> GetBids([FromRoute] int id, CancellationToken token)
+        {
+            _logger.LogDebug("GET /api/Lot/{Id}/bids called", id);
+            var result = await _service.GetAllBidsAsync(id, token);
+            if (!result.Success)
+            {
+                _logger.LogWarning("GetBids failed for Id={Id}: {Message}", id, result.Message);
+                return NotFound(result.Message);
+            }
+            return Ok(result.Data);
         }
     }
 }

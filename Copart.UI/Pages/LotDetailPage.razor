@@ -13,6 +13,17 @@
     {
         <MudText Typo="Typo.h4" GutterBottom="true">Lot #@lot.LotNumber</MudText>
         <MudText Typo="Typo.h5" GutterBottom="true">@lot.Vehicle.Make @lot.Vehicle.Model</MudText>
+       
+        if (lot.IsActive)
+        {
+            <MudText Typo="Typo.subtitle1" Color="Color.Success">Status: Active</MudText>
+        }
+        else
+        {
+            <MudText Typo="Typo.subtitle1" Color="Color.Error">Status: Closed</MudText>
+        }
+
+
         <MudText Typo="Typo.subtitle1" Color="Color.Secondary">Current Bid: @lot.CurrentBid.ToString("C")</MudText>
 
         <MudDivider Class="my-4" />
@@ -28,6 +39,9 @@
                               Immediate="true"
                               Style="width: 100%;" />
             </MudItem>
+
+            
+
             <MudItem xs="12" md="6" Class="d-flex align-items-center">
                 <MudButton OnClick="PlaceBid"
                            Color="Color.Primary"
@@ -120,9 +134,9 @@
 
     private async Task PlaceBid()
     {
-        if (lot is null)
+        if (lot is null || !lot.IsActive)
         {
-            Snackbar.Add("Lot not found.", Severity.Error);
+            Snackbar.Add("Lot not working", Severity.Error);
             return;
         }
 

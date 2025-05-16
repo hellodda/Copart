@@ -56,6 +56,7 @@ namespace Copart.Data.Repositories
             return await _context.Lots
                 .AsNoTracking()
                 .Include(l => l.Vehicle)
+                .Include(l => l.Bids)
                 .FirstOrDefaultAsync(l => l.LotNumber == lotNumber, token)
                 .ConfigureAwait(false);
         }

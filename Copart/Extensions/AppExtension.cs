@@ -1,4 +1,6 @@
-﻿namespace Copart.Api.Extensions
+﻿using Copart.Api.Hubs;
+
+namespace Copart.Api.Extensions
 {
     public static class AppExtension
     {
@@ -8,7 +10,8 @@
               policy.AllowAnyOrigin()
              .AllowAnyMethod()
              .AllowAnyHeader()
-         );
+             );
+            app.MapHub<BidsHub>("/bidsHub");
         }
     }
 }

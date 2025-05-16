@@ -1,5 +1,6 @@
 ﻿@page "/lotdetail/{lotNum}"
 @using Copart.UI.Models.BidModels
+@using Microsoft.AspNetCore.SignalR.Client
 @inject ILotApi LotApi
 @inject ISnackbar Snackbar
 
@@ -13,7 +14,7 @@
     {
         <MudText Typo="Typo.h4" GutterBottom="true">Lot #@lot.LotNumber</MudText>
         <MudText Typo="Typo.h5" GutterBottom="true">@lot.Vehicle.Make @lot.Vehicle.Model</MudText>
-       
+
         if (lot.IsActive)
         {
             <MudText Typo="Typo.subtitle1" Color="Color.Success">Status: Active</MudText>
@@ -31,23 +32,23 @@
         <MudGrid>
             <MudItem xs="12" md="6">
                 <MudTextField @bind-Value="amount"
-                              Label="Enter Your Bid"
-                              Variant="Variant.Filled"
-                              Type="number"
-                              Adornment="Adornment.End"
-                              AdornmentText="$"
-                              Immediate="true"
-                              Style="width: 100%;" />
+                Label="Enter Your Bid"
+                Variant="Variant.Filled"
+                Type="number"
+                Adornment="Adornment.End"
+                AdornmentText="$"
+                Immediate="true"
+                Style="width: 100%;" />
             </MudItem>
 
-            
+
 
             <MudItem xs="12" md="6" Class="d-flex align-items-center">
                 <MudButton OnClick="PlaceBid"
-                           Color="Color.Primary"
-                           Variant="Variant.Filled"
-                           Disabled="!IsValidBid"
-                           Style="margin-top: 8px;">
+                Color="Color.Primary"
+                Variant="Variant.Filled"
+                Disabled="!IsValidBid"
+                Style="margin-top: 8px;">
                     Submit Bid
                 </MudButton>
             </MudItem>
@@ -99,13 +100,45 @@
 
 @code {
     [Parameter] public string lotNum { get; set; } = default!;
+    private HubConnection _connection = default!;
     private LotModel? lot;
     private List<BidModel> bids = new();
     private BidModel? biggestBid;
     private bool isLoading = true;
     private int amount;
 
+    //-------------------------------------------------
+
     protected override async Task OnInitializedAsync()
+    {
+        await LoadLot();
+        await Setup();
+    }
+
+    //-------------------------------------------------
+
+    private bool IsValidBid => amount > 0;
+
+    private async Task Setup()
+    {
+        _connection = new HubConnectionBuilder()
+      .WithUrl("https://localhost:7043/bidsHub")
+      .WithAutomaticReconnect()
+      .Build();
+
+        _connection.On<string>("ReceiveMessage", async (message) =>
+        {
+            if (message.ToLower() == "ab")
+            {
+                await LoadLot();
+                StateHasChanged();
+            }
+        });
+
+        await _connection.StartAsync();
+    }
+
+    private async Task LoadLot()
     {
         try
         {
@@ -130,8 +163,6 @@
         }
     }
 
-    private bool IsValidBid => amount > 0;
-
     private async Task PlaceBid()
     {
         if (lot is null || !lot.IsActive)
@@ -148,11 +179,9 @@
                     LotId = lot.Id,
                     UserId = 4 
                 });
+            await _connection.SendAsync("SendMessage", "ab");
 
             Snackbar.Add("Bid successfully placed!", Severity.Success);
-
-            bids = (await LotApi.GetAllBids(lot.Id)).ToList();
-            biggestBid = await LotApi.GetBiggestBid(lot.Id);
         }
         catch (Exception ex)
         {

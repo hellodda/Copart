@@ -104,7 +104,7 @@
             }
 
             bids = (await LotApi.GetAllBids(lot.Id)).ToList();
-            //biggestBid = await LotApi.GetBiggestBid(lot.Id);
+            biggestBid = await LotApi.GetBiggestBid(lot.Id);
         }
         catch (Exception ex)
         {
@@ -138,7 +138,7 @@
             Snackbar.Add("Bid successfully placed!", Severity.Success);
 
             bids = (await LotApi.GetAllBids(lot.Id)).ToList();
-            //biggestBid = await LotApi.GetBiggestBid(lot.Id);
+            biggestBid = await LotApi.GetBiggestBid(lot.Id);
         }
         catch (Exception ex)
         {

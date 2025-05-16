@@ -43,7 +43,7 @@ namespace Copart.UI.Apis.LotApi
         {
             try
             {
-                return await _client.GetFromJsonAsync<IEnumerable<BidModel>>($"/Lot/{id}/bids", token);
+                return await _client.GetFromJsonAsync<IEnumerable<BidModel>>($"/Lot/{id}/bids/all", token);
             }
             catch (Exception ex)
             {
@@ -56,7 +56,7 @@ namespace Copart.UI.Apis.LotApi
         {
             try
             {
-                return await _client.GetFromJsonAsync<BidModel>($"/Lot/{id}/biggest", token);
+                return await _client.GetFromJsonAsync<BidModel>($"/Lot/{id}/bids/biggest", token);
             }
             catch (Exception ex)
             {

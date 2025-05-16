@@ -113,7 +113,7 @@ namespace Copart.Api.Controllers
             return Ok(result.Message);
         }
 
-        [HttpGet("{id:int}/biggest")]
+        [HttpGet("{id:int}/bids/biggest")]
         public async Task<IActionResult> GetBiggestBid([FromRoute] int id, CancellationToken token)
         {
             _logger.LogDebug("GET /api/Lot/{Id}/biggest called", id);
@@ -148,7 +148,7 @@ namespace Copart.Api.Controllers
         }
     
 
-        [HttpGet("{id:int}/bids")]
+        [HttpGet("{id:int}/bids/all")]
         public async Task<IActionResult> GetBids([FromRoute] int id, CancellationToken token)
         {
             _logger.LogDebug("GET /api/Lot/{Id}/bids called", id);

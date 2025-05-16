@@ -17,7 +17,7 @@ namespace Copart.UI.Apis.LotApi
         {
             try
             {
-                await _client.PostAsJsonAsync($"Lot/{id}/bids", bid, token);
+                await _client.PostAsJsonAsync($"Lot/{id}/bid", bid, token);
             }
             catch (Exception ex)
             {

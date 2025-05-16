@@ -12,6 +12,7 @@
     else if (lot is not null)
     {
         <MudText Typo="Typo.h4" GutterBottom="true">Lot #@lot.LotNumber</MudText>
+        <MudText Typo="Typo.h5" GutterBottom="true">@lot.Vehicle.Make @lot.Vehicle.Model</MudText>
         <MudText Typo="Typo.subtitle1" Color="Color.Secondary">Current Bid: @lot.CurrentBid.ToString("C")</MudText>
 
         <MudDivider Class="my-4" />
@@ -103,11 +104,11 @@
             }
 
             bids = (await LotApi.GetAllBids(lot.Id)).ToList();
-            biggestBid = await LotApi.GetBiggestBid(lot.Id);
+            //biggestBid = await LotApi.GetBiggestBid(lot.Id);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error loading lot: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
         }
         finally
         {
@@ -131,13 +132,13 @@
                 {
                     Amount = amount,
                     LotId = lot.Id,
-                    UserId = 10 
+                    UserId = 4 
                 });
 
             Snackbar.Add("Bid successfully placed!", Severity.Success);
 
             bids = (await LotApi.GetAllBids(lot.Id)).ToList();
-            biggestBid = await LotApi.GetBiggestBid(lot.Id);
+            //biggestBid = await LotApi.GetBiggestBid(lot.Id);
         }
         catch (Exception ex)
         {

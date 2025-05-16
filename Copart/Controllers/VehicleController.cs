@@ -34,7 +34,7 @@ namespace Copart.Api.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetById(int id, CancellationToken token)
+        public async Task<IActionResult> GetById([FromRoute] int id, CancellationToken token)
         {
             _logger.LogDebug("Fetching vehicle by ID: {Id}", id);
             var result = await _service.GetByIdAsync(id, token);
@@ -94,7 +94,7 @@ namespace Copart.Api.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(int id, [FromBody] VehicleUpdateModel vehicle, CancellationToken token)
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] VehicleUpdateModel vehicle, CancellationToken token)
         {
             _logger.LogDebug("Updating vehicle ID {Id} with data: {@Vehicle}", id, vehicle);
             var result = await _service.UpdateAsync(id, vehicle, token);
@@ -109,7 +109,7 @@ namespace Copart.Api.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        public async Task<IActionResult> Delete(int id, CancellationToken token)
+        public async Task<IActionResult> Delete([FromRoute] int id, CancellationToken token)
         {
             _logger.LogDebug("Deleting vehicle with ID: {Id}", id);
             var result = await _service.DeleteAsync(id, token);

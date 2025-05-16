@@ -53,7 +53,7 @@ namespace Copart.Api.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(int id, [FromBody] UserUpdateModel user, CancellationToken token)
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UserUpdateModel user, CancellationToken token)
         {
             _logger.LogDebug("PUT /api/User/{Id} called with {@User}", id, user);
             if (!ModelState.IsValid)
@@ -73,7 +73,7 @@ namespace Copart.Api.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        public async Task<IActionResult> Delete(int id, CancellationToken token)
+        public async Task<IActionResult> Delete([FromRoute] int id, CancellationToken token)
         {
             _logger.LogDebug("DELETE /api/User/{Id} called", id);
             var result = await _userService.DeleteAsync(id, token);
@@ -87,7 +87,7 @@ namespace Copart.Api.Controllers
         }
 
         [HttpPatch("{id:int}/bids")]
-        public async Task<IActionResult> AddBid(int id, [FromBody] BidAddModel bid, CancellationToken token)
+        public async Task<IActionResult> AddBid([FromRoute] int id, [FromBody] BidAddModel bid, CancellationToken token)
         {
             _logger.LogDebug("PATCH /api/User/{Id}/bids called with {@Bid}", id, bid);
             if (!ModelState.IsValid)

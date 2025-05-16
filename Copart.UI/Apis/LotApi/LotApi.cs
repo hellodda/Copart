@@ -1,4 +1,5 @@
-﻿using Copart.UI.Models.LotModels;
+﻿using Copart.UI.Models.BidModels;
+using Copart.UI.Models.LotModels;
 using System.Net.Http.Json;
 
 namespace Copart.UI.Apis.LotApi
@@ -12,11 +13,37 @@ namespace Copart.UI.Apis.LotApi
             _client = client;
         }
 
+        public async Task AddBid(int id, BidAddModel bid, CancellationToken token = default)
+        {
+            try
+            {
+                await _client.PostAsJsonAsync($"Lot/{id}/bids", bid, token);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching lots: {ex.Message}");
+                throw;
+            }
+        }
+
         public async Task<IEnumerable<LotModel>> GetAll(CancellationToken token)
         {
             try
             {
                 return await _client.GetFromJsonAsync<IEnumerable<LotModel>>("/Lot", token);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching lots: {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task<BidModel> GetBiggestBid(int id, CancellationToken token = default)
+        {
+            try
+            {
+                return await _client.GetFromJsonAsync<BidModel>($"/Lot/{id}/biggest", token);
             }
             catch (Exception ex)
             {

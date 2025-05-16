@@ -33,7 +33,7 @@ namespace Copart.Api.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetById(int id, CancellationToken token)
+        public async Task<IActionResult> GetById([FromRoute] int id, CancellationToken token)
         {
             _logger.LogDebug("GET /api/Lot/{Id} called", id);
             var result = await _service.GetByIdAsync(id, token);
@@ -79,7 +79,7 @@ namespace Copart.Api.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(int id, [FromBody] LotUpdateModel model, CancellationToken token)
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] LotUpdateModel model, CancellationToken token)
         {
             _logger.LogDebug("PUT /api/Lot/{Id} called with {@Model}", id, model);
             if (!ModelState.IsValid)
@@ -101,7 +101,7 @@ namespace Copart.Api.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        public async Task<IActionResult> Delete(int id, CancellationToken token)
+        public async Task<IActionResult> Delete([FromRoute] int id, CancellationToken token)
         {
             _logger.LogDebug("DELETE /api/Lot/{Id} called", id);
             var result = await _service.DeleteAsync(id, token);
@@ -114,7 +114,7 @@ namespace Copart.Api.Controllers
         }
 
         [HttpGet("{id:int}/biggest")]
-        public async Task<IActionResult> GetBiggestBid(int id, CancellationToken token)
+        public async Task<IActionResult> GetBiggestBid([FromRoute] int id, CancellationToken token)
         {
             _logger.LogDebug("GET /api/Lot/{Id}/biggest called", id);
             var result = await _service.GetBiggestBidAsync(id, token);
@@ -126,8 +126,8 @@ namespace Copart.Api.Controllers
             return Ok(result.Data);
         }
 
-        [HttpPatch("{id:int}/bids")]
-        public async Task<IActionResult> AddBid(int id, [FromBody] BidAddModel bid, CancellationToken token)
+        [HttpPost("{id:int}/bids")]
+        public async Task<IActionResult> AddBid([FromRoute] int id, [FromBody] BidAddModel bid, CancellationToken token)
         {
             _logger.LogDebug("PATCH /api/Lot/{Id}/bids called with {@Bid}", id, bid);
             if (!ModelState.IsValid)

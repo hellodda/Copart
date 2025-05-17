@@ -1,0 +1,29 @@
+﻿@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+
+@inject NavigationManager Navigation
+@inject SignOutSessionStateManager SignOutManager
+
+
+<AuthorizeView>
+    <Authorized>
+        Hi! @context.User.Identity.Name
+        <button @onclick="Logout" class="btn menu-button">Logout</button>
+    </Authorized>
+    <NotAuthorized>
+        <button @onclick="Login" class="btn btn-warning">Login</button>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+
+
+    private async Task Logout()
+    {
+        await SignOutManager.SetSignOutState();
+        Navigation.NavigateTo("authentication/logout");
+    }
+    private void Login()
+    {
+        Navigation.NavigateTo("authentication/login");
+    }
+}

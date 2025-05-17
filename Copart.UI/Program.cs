@@ -1,3 +1,4 @@
+using Copart.Api.Extensions;
 using Copart.UI;
 using Copart.UI.Extensions;
 using Microsoft.AspNetCore.Components.Web;
@@ -10,5 +11,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddMudServices();
 builder.Services.AddProjectClients(new ("https://localhost:7043"));
+
+builder.Configure();
 
 await builder.Build().RunAsync();

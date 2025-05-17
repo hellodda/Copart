@@ -22,12 +22,15 @@ if (app.Environment.IsDevelopment())
 }
 
 app.Configure();
+app.ConfigureBackgroundJobs();
 
-//app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
+
 
 app.MapControllers();
 

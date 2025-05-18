@@ -6,7 +6,7 @@
 
 <AuthorizeView>
     <Authorized>
-        Hi! @context.User.Identity.Name
+        <MudText Color="Color.Warning">Hi! @context.User.Identity.Name</MudText>
         <button @onclick="Logout" class="btn menu-button">Logout</button>
     </Authorized>
     <NotAuthorized>

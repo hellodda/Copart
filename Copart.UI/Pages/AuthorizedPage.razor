@@ -1,0 +1,38 @@
+﻿@page "/authorized"
+
+@using Copart.UI.Models.UserModels
+@using Copart.UI.Apis.UserApi
+@using System.Security.Claims
+
+@attribute [Authorize]
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@inject IUserApi UserApi
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = state.User;
+
+        if (user.Identity?.IsAuthenticated ?? false)
+        {
+            var email = user.Identity.Name;
+            var existingUser = await UserApi.GetByName(email!); 
+
+            if (existingUser is null)
+            {
+                var model = new UserAddModel
+                    {
+                        Name = user.Identity.Name!,
+                        Email = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value!,
+                    };
+
+                await UserApi.Add(model);
+            }
+        }
+
+        NavigationManager.NavigateTo("/");
+    }
+}

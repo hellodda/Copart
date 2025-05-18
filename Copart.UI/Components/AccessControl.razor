@@ -1,5 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 
+
 @inject NavigationManager Navigation
 @inject SignOutSessionStateManager SignOutManager
 
@@ -21,7 +22,7 @@
         await SignOutManager.SetSignOutState();
         Navigation.NavigateTo("authentication/logout");
     }
-    private void Login()
+    private async Task Login()
     {
         Navigation.NavigateTo("authentication/login");
     }

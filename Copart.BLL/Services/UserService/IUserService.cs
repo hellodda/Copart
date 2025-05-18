@@ -8,6 +8,7 @@ namespace Copart.BLL.Services.BidderService
     public interface IUserService : IService
     {
         public Task<Result<IEnumerable<UserModel?>?>> GetAllAsync(CancellationToken token = default);
+        public Task<Result<UserModel>> GetByNameAsync(string name, CancellationToken token = default);
         public Task<Result<UserModel?>> GetByIdAsync(int id, CancellationToken token = default);
         public Task<Result> AddAsync(UserAddModel model, IValidator<UserAddModel> validator, CancellationToken token = default);
         public Task<Result> AddBidAsync(int id, BidAddModel model, CancellationToken token = default);

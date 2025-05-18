@@ -138,6 +138,29 @@ namespace Copart.BLL.Services.BidderService
             }
         }
 
+        public async Task<Result<UserModel>> GetByNameAsync(string name, CancellationToken token = default)
+        {
+            _logger.LogDebug("GetByNameAsync invoked for Name={Name}", name);
+            try
+            {
+                var user = await _uow.UserRepository.GetByNameAsync(name, token).ConfigureAwait(false);
+                if (user is null)
+                {
+                    _logger.LogWarning("GetByNameAsync failed: User not found, Name={Name}", name);
+                    return Result<UserModel>.Fail("User not found")!;
+                }
+
+                var model = _mapper.Map<UserModel>(user);
+                _logger.LogInformation("User retrieved successfully: Name={Name}", name);
+                return Result<UserModel>.Ok(model)!;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving user by name Name={Name}", name);
+                return Result<UserModel>.Fail("An error occurred while retrieving the user.")!;
+            }
+        }
+
         public async Task<Result> UpdateAsync(int userId, UserUpdateModel model, CancellationToken token = default)
         {
             _logger.LogDebug("UpdateAsync invoked for UserId={UserId} with UserUpdateModel: {@Model}", userId, model);

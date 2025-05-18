@@ -32,6 +32,19 @@ namespace Copart.Api.Controllers
             return Ok(result.Data);
         }
 
+        [HttpGet("{name}")]
+        public async Task<IActionResult> GetByName([FromRoute] string name, CancellationToken token)
+        {
+            _logger.LogDebug("GET /api/User/name called with {Name}", name);
+            var result = await _userService.GetByNameAsync(name, token);
+            if (!result.Success)
+            {
+                _logger.LogWarning("GetByName failed: {Message}", result.Message);
+                return BadRequest(result.Message);
+            }
+            return Ok(result.Data);
+        }
+
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] UserAddModel user, [FromServices] IValidator<UserAddModel> validator, CancellationToken token)
         {
@@ -86,7 +99,7 @@ namespace Copart.Api.Controllers
             return Ok(result.Message);
         }
 
-        [HttpPatch("{id:int}/bids")]
+        [HttpPost("{id:int}/bids")]
         public async Task<IActionResult> AddBid([FromRoute] int id, [FromBody] BidAddModel bid, CancellationToken token)
         {
             _logger.LogDebug("PATCH /api/User/{Id}/bids called with {@Bid}", id, bid);

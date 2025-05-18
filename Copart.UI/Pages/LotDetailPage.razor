@@ -1,8 +1,13 @@
 ﻿@page "/lotdetail/{lotNum}"
 @using Copart.UI.Models.BidModels
+@using Copart.UI.Models.UserModels
 @using Microsoft.AspNetCore.SignalR.Client
+@using Copart.UI.Apis.UserApi
+@using System.Security.Claims
 @inject ILotApi LotApi
 @inject ISnackbar Snackbar
+@inject IUserApi UserApi
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <MudPaper Class="lot-detail-paper" Style="padding: 24px; max-width:800px; margin:auto;">
 
@@ -40,20 +45,20 @@
                 Immediate="true"
                 Style="width: 100%;" />
             </MudItem>
-            
+
             <MudItem xs="12" md="6" Class="d-flex align-items-center">
                 <AuthorizeView>
                     <Authorized>
                         <MudButton OnClick="PlaceBid"
-                                   Color="Color.Primary"
-                                   Variant="Variant.Filled"
-                                   Disabled="!IsValidBid"
-                                   Style="margin-top: 8px;">
+                        Color="Color.Primary"
+                        Variant="Variant.Filled"
+                        Disabled="!IsValidBid"
+                        Style="margin-top: 8px;">
                             Submit Bid
                         </MudButton>
                     </Authorized>
                     <NotAuthorized>
-                       <MudText>NotAuthorized!!! :(</MudText>
+                        <MudText>NotAuthorized!!! :(</MudText>
                     </NotAuthorized>
                 </AuthorizeView>
             </MudItem>
@@ -83,7 +88,6 @@
                 <HeaderContent>
                     <MudTh>User ID</MudTh>
                     <MudTh>Amount</MudTh>
-                    <MudTh>Time</MudTh>
                 </HeaderContent>
                 <RowTemplate>
                     <MudTd DataLabel="User">@context.UserId</MudTd>
@@ -109,6 +113,8 @@
     private LotModel? lot;
     private List<BidModel> bids = new();
     private BidModel? biggestBid;
+    private UserModel? m_user;
+    private ClaimsPrincipal? c_user;
     private bool isLoading = true;
     private int amount;
 
@@ -126,6 +132,16 @@
 
     private async Task Setup()
     {
+        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        c_user = state.User;
+
+        m_user = await UserApi.GetByName(c_user.Identity!.Name!);
+
+        if (m_user is null)
+        {
+            
+        }
+
         _connection = new HubConnectionBuilder()
       .WithUrl("https://localhost:7043/bidsHub")
       .WithAutomaticReconnect()
@@ -182,7 +198,7 @@
                 {
                     Amount = amount,
                     LotId = lot.Id,
-                    UserId = 4 
+                    UserId = m_user!.Id
                 });
             await _connection.SendAsync("SendMessage", "ab");
 

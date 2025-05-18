@@ -1,5 +1,6 @@
 ﻿using Copart.UI.Apis.LotApi;
 using Copart.UI.Apis.SearchApi;
+using Copart.UI.Apis.UserApi;
 using Copart.UI.Apis.VehicleApi;
 
 namespace Copart.UI.Extensions
@@ -17,6 +18,10 @@ namespace Copart.UI.Extensions
                 client.BaseAddress = baseAddress;
             });
             services.AddHttpClient<IVehicleApi, VehicleApi>(client =>
+            {
+                client.BaseAddress = baseAddress;
+            });
+            services.AddHttpClient<IUserApi, UserApi>(client =>
             {
                 client.BaseAddress = baseAddress;
             });

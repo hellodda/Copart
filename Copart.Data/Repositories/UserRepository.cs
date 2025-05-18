@@ -49,6 +49,15 @@ namespace Copart.Data.Repositories
                 .ConfigureAwait(false);
         }
 
+        public async Task<User?> GetByNameAsync(string name, CancellationToken token = default)
+        {
+            return await _context.Users
+                .AsNoTracking()
+                .Include(u => u.Bids)
+                .FirstOrDefaultAsync(u => u.Name == name, token)
+                .ConfigureAwait(false);
+        }
+
         public Task UpdateAsync(User user, CancellationToken token = default)
         {
             _context.Users.Update(user);

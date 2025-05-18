@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
-namespace Copart.Api.Extensions
+namespace Copart.UI.Extensions
 {
     public static class BuilderExtension
     {

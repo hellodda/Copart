@@ -1,4 +1,3 @@
-using Copart.Api.Extensions;
 using Copart.UI;
 using Copart.UI.Extensions;
 using Microsoft.AspNetCore.Components.Web;

@@ -4,24 +4,28 @@ namespace Copart.BLL.Services.BackgroundJob
 {
     public class BackgroundJobQueue : IBackgroundJobQueue
     {
-        private readonly Channel<Func<CancellationToken, Task>> _queue;
-
-        public BackgroundJobQueue()
-        {
-            _queue = Channel.CreateUnbounded<Func<CancellationToken, Task>>();
-        }
+        private readonly List<Func<CancellationToken, Task>> _jobs = new();
+        private readonly object _locker = new();
+        private int _currentIndex = 0;
 
         public void EnqueueJob(Func<CancellationToken, Task> job)
         {
-            if (!_queue.Writer.TryWrite(job))
+            if (job is null) throw new ArgumentNullException(nameof(job));
+
+            lock (_locker)
             {
-                throw new Exception("Canot add job to the queue");
+                _jobs.Add(job);
             }
         }
 
         public async Task<Func<CancellationToken, Task>> DequeueAsync(CancellationToken cancellationToken)
         {
-            return await _queue.Reader.ReadAsync(cancellationToken);
+            lock (_locker)
+            {
+                var job = _jobs[_currentIndex];
+                _currentIndex = (_currentIndex + 1) % _jobs.Count;
+                return job;
+            }
         }
     }
 }

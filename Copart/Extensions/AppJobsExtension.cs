@@ -1,4 +1,5 @@
 ﻿using Copart.BLL.Services.BackgroundJob;
+using Copart.BLL.Services.LotService;
 
 namespace Copart.Api.Extensions
 {
@@ -6,15 +7,18 @@ namespace Copart.Api.Extensions
     {
         public static void ConfigureBackgroundJobs(this WebApplication app)
         {
-            using (var scope = app.Services.CreateScope())
-            {
-                var queue = scope.ServiceProvider.GetRequiredService<IBackgroundJobQueue>();
+            var queue = app.Services.GetRequiredService<IBackgroundJobQueue>();
 
-                queue.EnqueueJob(async token =>
-                {
-                    
-                });
-            }
+            //jobs \/ \/ \/ \/ \/ \/ \/ \/
+
+            queue.EnqueueJob(async token =>
+            {
+                using var scope = app.Services.CreateScope();
+                var lotService = scope.ServiceProvider.GetRequiredService<ILotService>();
+                await lotService.ChangeAllLotsStatus(token);
+            });
+
+            //jobs /\ /\ /\ /\ /\ /\ /\ /\
         }
     }
 }

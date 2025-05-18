@@ -40,17 +40,22 @@
                 Immediate="true"
                 Style="width: 100%;" />
             </MudItem>
-
-
-
+            
             <MudItem xs="12" md="6" Class="d-flex align-items-center">
-                <MudButton OnClick="PlaceBid"
-                Color="Color.Primary"
-                Variant="Variant.Filled"
-                Disabled="!IsValidBid"
-                Style="margin-top: 8px;">
-                    Submit Bid
-                </MudButton>
+                <AuthorizeView>
+                    <Authorized>
+                        <MudButton OnClick="PlaceBid"
+                                   Color="Color.Primary"
+                                   Variant="Variant.Filled"
+                                   Disabled="!IsValidBid"
+                                   Style="margin-top: 8px;">
+                            Submit Bid
+                        </MudButton>
+                    </Authorized>
+                    <NotAuthorized>
+                       <MudText>NotAuthorized!!! :(</MudText>
+                    </NotAuthorized>
+                </AuthorizeView>
             </MudItem>
         </MudGrid>
 

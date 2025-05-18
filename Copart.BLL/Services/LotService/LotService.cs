@@ -254,5 +254,37 @@ namespace Copart.BLL.Services.LotService
             }
 
         }
+
+        public async Task<Result> ChangeAllLotsStatus(CancellationToken token = default)
+        {
+            _logger.LogDebug("ChangeAllLotsStatus invoked");
+            try
+            {
+                var lots = await _uow.LotRepository.GetAllAsync(token);
+
+                if (lots is null || !lots.Any())
+                {
+                    _logger.LogWarning("No lots found to change status");
+                    return Result.Fail("No lots found to change status.");
+                }
+
+                foreach (var lot in lots)
+                {
+                    if (lot.EndDate < DateTime.UtcNow)
+                    {
+                        lot.IsActive = false;
+                        await _uow.LotRepository.UpdateAsync(lot, token);
+                    }
+                }
+                await _uow.Save(token);
+                _logger.LogInformation("All lots status changed successfully");
+                return Result.Ok("All lots status changed");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error changing all lots status");
+                return Result.Fail("An error occurred while changing all lots status.");
+            }
+        }
     }
 }

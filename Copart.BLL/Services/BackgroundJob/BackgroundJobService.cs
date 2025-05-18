@@ -8,6 +8,7 @@ namespace Copart.BLL.Services.BackgroundJob
     {
         private readonly ILogger<BackgroundJobService> _logger;
         private readonly IBackgroundJobQueue _jobQueue;
+        private TimeSpan stoptime = TimeSpan.FromMinutes(1);
 
         public BackgroundJobService(ILogger<BackgroundJobService> logger, IBackgroundJobQueue jobQueue)
         {
@@ -31,6 +32,7 @@ namespace Copart.BLL.Services.BackgroundJob
                 {
                     _logger.LogError(ex, "Error from BJ");
                 }
+                await Task.Delay(stoptime, stoppingToken);
             }
         }
     }
